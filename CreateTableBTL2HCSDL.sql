@@ -11,37 +11,6 @@
 -- USE OnlineCoursePlatform;
 -- GO
 
--- Tạo bảng học viên
--- CREATE TABLE Students (
---     StudentID INT PRIMARY KEY IDENTITY,
---     StudentName NVARCHAR(100),
---     StudentEmail NVARCHAR(100) UNIQUE,
---     Avatar NVARCHAR(255),
---     Address NVARCHAR(255),
---     PhoneNumber NVARCHAR(20),
---     Password NVARCHAR(100)
--- );
-
--- -- Bảng người đại diện
--- CREATE TABLE Guardians (
---     GuardianID INT PRIMARY KEY IDENTITY,
---     GuardianName NVARCHAR(100),
---     GuardianContactInfo NVARCHAR(255),
---     StudentID INT UNIQUE,
---     FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
--- );
-
--- -- Tạo bảng giảng viên
--- CREATE TABLE Instructors (
---     InstructorID INT PRIMARY KEY IDENTITY,
---     InstructorName NVARCHAR(100),
---     InstructorDescription NVARCHAR(255),
---     Avatar NVARCHAR(255),
---     Email NVARCHAR(100) UNIQUE,
---     PhoneNumber NVARCHAR(20),
---     Password NVARCHAR(100)
--- );
-
 -- Tạo bảng Users
 CREATE TABLE Users (
     UserID INT PRIMARY KEY IDENTITY,
