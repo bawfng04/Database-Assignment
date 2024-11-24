@@ -1,6 +1,3 @@
-
-
-
 -- Bảng chỉnh sửa
 CREATE TABLE Edit (
     Edit_ID INT PRIMARY KEY,
@@ -10,7 +7,9 @@ CREATE TABLE Edit (
     Edit_Coupon_ID INT,
     EDIT_Course_ID INT,
 
-
+    FOREIGN KEY (Edit_Admin_ID) REFERENCES Admin(Admin_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Edit_Coupon_ID) REFERENCES Coupon(Coupon_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Edit_Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
 );
 
 -- Bảng danh mục
@@ -24,13 +23,18 @@ CREATE TABLE Categories (
 CREATE TABLE Teacher(
     Teacher_ID INT PRIMARY KEY,
     Teacher_Description TEXT,
+
+    FOREIGN KEY (Teacher_ID) REFERENCES Users(Username_ID) ON DELETE CASCADE,
 );
 
 --Giảng viên dạy khoá học
 CREATE TABLE Teacher_Course(
     Teacher_ID INT,
     Course_ID INT,
+
     PRIMARY KEY (Teacher_ID, Course_ID),
+    FOREIGN KEY (Teacher_ID) REFERENCES Teacher(Teacher_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
 );
 
 --Khoá học áp dụng phiếu giảm giá
@@ -38,6 +42,9 @@ CREATE TABLE Course_Coupon(
     Course_ID INT,
     Coupon_ID INT,
     PRIMARY KEY (Course_ID, Coupon_ID),
+
+    FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Coupon_ID) REFERENCES Coupon(Coupon_ID) ON DELETE CASCADE,
 );
 
 -- Phiếu giảm giá
@@ -62,6 +69,8 @@ CREATE TABLE Course(
     Course_Start_Date DATE,
     Course_End_Date DATE,
     Course_Categories_ID INT,
+
+    FOREIGN KEY (Course_Categories_ID) REFERENCES Categories(Categories_ID) ON DELETE CASCADE,
 );
 
 
@@ -70,6 +79,9 @@ CREATE TABLE Course_Cart(
     Course_ID INT,
     Cart_ID INT,
     PRIMARY KEY (Course_ID, Cart_ID),
+
+    FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Cart_ID) REFERENCES Cart(Cart_ID) ON DELETE CASCADE,
 );
 
 
@@ -84,6 +96,9 @@ CREATE TABLE Course_Student(
     Course_ID INT,
     Student_ID INT,
     PRIMARY KEY (Course_ID, Student_ID),
+
+    FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE,
 );
 
 
@@ -98,12 +113,16 @@ CREATE TABLE Payment_Method(
 CREATE TABLE Momo(
     Momo_ID INT PRIMARY KEY, --mã thanh toán
     Momo_Phone_Number INT,
+
+    FOREIGN KEY (Momo_ID) REFERENCES Payment_Method(Payment_Method_ID) ON DELETE CASCADE,
 );
 
 --Internet banking
 CREATE TABLE Internet_Banking(
     Internet_Banking_ID INT PRIMARY KEY, --mã thanh toán
     Internet_Banking_Bank_Name VARCHAR(255),
+
+    FOREIGN KEY (Internet_Banking_ID) REFERENCES Payment_Method(Payment_Method_ID) ON DELETE CASCADE,
 );
 
 --Visa
@@ -111,6 +130,8 @@ CREATE TABLE Visa(
     Visa_ID INT PRIMARY KEY, --mã thanh toán
     Visa_Card_Number INT, --số thẻ
     Visa_Expiry_Date DATE, --ngày hết hạn
+
+    FOREIGN KEY (Visa_ID) REFERENCES Payment_Method(Payment_Method_ID) ON DELETE CASCADE,
 );
 
 --Khoá học được thêm vào đơn hàng
@@ -118,6 +139,9 @@ CREATE TABLE Course_Order(
     Course_ID INT,
     Order_ID INT,
     PRIMARY KEY (Course_ID, Order_ID),
+
+    FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Order_ID) REFERENCES Orders(Orders_ID) ON DELETE CASCADE,
 );
 
 --Đơn hàng
@@ -127,6 +151,9 @@ CREATE TABLE Orders (
     Orders_Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     Payment_ID INT, --mã thanh toán
     Student_ID INT, --mã học viên
+
+    FOREIGN KEY (Payment_ID) REFERENCES Payment_Method(Payment_Method_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE,
 );
 
 --Đánh giá
@@ -137,12 +164,18 @@ CREATE TABLE Reviews (
     Reviews_Content TEXT,
     Student_ID INT,
     PRIMARY KEY (Reviews_ID, Course_ID),
-)
+
+    FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE,
+);
 
 --Học viên
 CREATE TABLE Student(
     Student_ID INT PRIMARY KEY,
     Student_Cart_ID INT,
+
+    FOREIGN KEY (Student_Cart_ID) REFERENCES Cart(Cart_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Student_ID) REFERENCES Users(Username_ID) ON DELETE CASCADE,
 );
 
 --Người đại diện
@@ -153,6 +186,8 @@ CREATE TABLE Guardians(
     Guardians_Email VARCHAR(255),
     Guardians_Phone_Number INT,
     PRIMARY KEY (Guardians_ID, Student_ID),
+
+    FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE,
 )
 
 --Người dùng hệ thống
@@ -168,7 +203,9 @@ CREATE TABLE Users(
 
 --Admin
 CREATE TABLE Admin(
-    Admin_ID INT PRIMARY KEY
+    Admin_ID INT PRIMARY KEY,
+
+    FOREIGN KEY (Admin_ID) REFERENCES Users(Username_ID) ON DELETE CASCADE,
 )
 
 --Bài tập
@@ -181,6 +218,10 @@ CREATE TABLE Exercise(
     Exercise_Solution TEXT,
     Exercise_Number_Of_Correct_Answers INT,
     Exercise_Content TEXT,
+
+    FOREIGN KEY (Lesson_Order) REFERENCES Lesson(Lesson_Order) ON DELETE CASCADE,
+    FOREIGN KEY (Course_ID) REFERENCES Lesson(Course_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Chapter_Name) REFERENCES Lesson(Chapter_Name) ON DELETE CASCADE,
 )
 
 --Bài học
@@ -191,6 +232,9 @@ CREATE TABLE Lesson (
     Lesson_Title VARCHAR(255),
     Lesson_Content TEXT,
     Lesson_Duration INT,
+
+    FOREIGN KEY (Course_ID) REFERENCES Chapter(Course_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Chapter_Name) REFERENCES Chapter(Chapter_Name) ON DELETE CASCADE,
 )
 
 --Tài liệu
@@ -201,6 +245,8 @@ CREATE TABLE Document(
     Document_Title VARCHAR(255),
     Document_Size INT,
     Document_Type VARCHAR(255),
+
+    FOREIGN KEY (Course_ID) REFERENCES Lesson(Course_ID) ON DELETE CASCADE,
 )
 
 
@@ -209,10 +255,11 @@ CREATE TABLE Chapter(
     Chapter_Name VARCHAR(255),
     Course_ID INT,
     PRIMARY KEY (Chapter_Name, Course_ID),
+
+    FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID) ON DELETE CASCADE,
 )
 
 --Bài kiểm tra
-
 CREATE TABLE Test(
     Test_Order INT,
     Chapter_Name VARCHAR(255),
@@ -222,4 +269,8 @@ CREATE TABLE Test(
     Test_TakenTimes INT,
     Test_Number_Of_Correct_Answers INT,
     Test_Content TEXT,
+
+
+    FOREIGN KEY (Chapter_Name) REFERENCES Chapter(Chapter_Name) ON DELETE CASCADE,
+    FOREIGN KEY (Course_ID) REFERENCES Chapter(Course_ID) ON DELETE CASCADE,
 )
