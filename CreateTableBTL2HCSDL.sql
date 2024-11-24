@@ -1,4 +1,8 @@
 
+--cd "D:\HCSDL\BTL\BTL2 HCSDL"
+--git add .
+--git commit -m ""
+--git push origin master
 -------------------------------- TẠO CSDL --------------------------------
 
 -- CREATE DATABASE OnlineCoursePlatform;
@@ -8,14 +12,70 @@
 -- GO
 
 -- Tạo bảng học viên
+-- CREATE TABLE Students (
+--     StudentID INT PRIMARY KEY IDENTITY,
+--     StudentName NVARCHAR(100),
+--     StudentEmail NVARCHAR(100) UNIQUE,
+--     Avatar NVARCHAR(255),
+--     Address NVARCHAR(255),
+--     PhoneNumber NVARCHAR(20),
+--     Password NVARCHAR(100)
+-- );
+
+-- -- Bảng người đại diện
+-- CREATE TABLE Guardians (
+--     GuardianID INT PRIMARY KEY IDENTITY,
+--     GuardianName NVARCHAR(100),
+--     GuardianContactInfo NVARCHAR(255),
+--     StudentID INT UNIQUE,
+--     FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
+-- );
+
+-- -- Tạo bảng giảng viên
+-- CREATE TABLE Instructors (
+--     InstructorID INT PRIMARY KEY IDENTITY,
+--     InstructorName NVARCHAR(100),
+--     InstructorDescription NVARCHAR(255),
+--     Avatar NVARCHAR(255),
+--     Email NVARCHAR(100) UNIQUE,
+--     PhoneNumber NVARCHAR(20),
+--     Password NVARCHAR(100)
+-- );
+
+-- Tạo bảng Users
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY,
+    UserName NVARCHAR(100),
+    Email NVARCHAR(100) UNIQUE,
+    PhoneNumber NVARCHAR(20),
+    Password NVARCHAR(100),
+    Address NVARCHAR(255),
+    Avatar NVARCHAR(255)
+);
+
+-- Tạo bảng Students
 CREATE TABLE Students (
     StudentID INT PRIMARY KEY IDENTITY,
-    StudentName NVARCHAR(100),
-    StudentEmail NVARCHAR(100) UNIQUE,
-    Avatar NVARCHAR(255),
-    Address NVARCHAR(255),
-    PhoneNumber NVARCHAR(20),
-    Password NVARCHAR(100)
+    UserID INT UNIQUE,
+    -- Các thuộc tính riêng của Students
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+-- Tạo bảng Instructors
+CREATE TABLE Instructors (
+    InstructorID INT PRIMARY KEY IDENTITY,
+    UserID INT UNIQUE,
+    -- Các thuộc tính riêng của Instructors
+    InstructorDescription NVARCHAR(255),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+-- Tạo bảng Admins
+CREATE TABLE Admins (
+    AdminID INT PRIMARY KEY IDENTITY,
+    UserID INT UNIQUE,
+    -- Các thuộc tính riêng của Admins
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
 -- Bảng người đại diện
@@ -25,17 +85,6 @@ CREATE TABLE Guardians (
     GuardianContactInfo NVARCHAR(255),
     StudentID INT UNIQUE,
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
-);
-
--- Tạo bảng giảng viên
-CREATE TABLE Instructors (
-    InstructorID INT PRIMARY KEY IDENTITY,
-    InstructorName NVARCHAR(100),
-    InstructorDescription NVARCHAR(255),
-    Avatar NVARCHAR(255),
-    Email NVARCHAR(100) UNIQUE,
-    PhoneNumber NVARCHAR(20),
-    Password NVARCHAR(100)
 );
 
 -- Tạo bảng danh mục
@@ -141,14 +190,6 @@ CREATE TABLE Coupons (
     Conditions NVARCHAR(255)
 );
 
--- Bảng admin
-CREATE TABLE Admins (
-    AdminID INT PRIMARY KEY IDENTITY,
-    Name NVARCHAR(100),
-    Email NVARCHAR(100) UNIQUE,
-    Password NVARCHAR(100)
-);
-
 -- Admin sửa thông tin khoá học/phiếu giảm giá
 CREATE TABLE Edits (
     EditID INT PRIMARY KEY IDENTITY,
@@ -175,31 +216,47 @@ ADD CONSTRAINT CK_Edits_OnlyOneNotNull CHECK (
 
 -------------------------------- CHÈN DỮ LIỆU MẪU --------------------------------
 
+-- Bảng Users
+SET IDENTITY_INSERT Users ON;
+
+INSERT INTO Users (UserID, UserName, Email, PhoneNumber, Password, Address, Avatar)
+VALUES
+(1, 'Nguyen Van A', 'A@example.com', '224-3123', 'password123', '456 Main St', 'avatar.jpg'),
+(2, 'Nguyen Thi C', 'C@example.com', '523-5523', 'password123', '314 Main St', 'avatar.jpg'),
+(3, 'Tran Minh X', 'Xstu@gmail.com', '412-5124', 'password123', '512 Main St', 'avatar.jpg'),
+(4, 'Tran Thi Y', 'Ystu@gmail.com', '123-1234', 'password123', '123 Main St', 'avatar.jpg'),
+(5, 'Le Van Z', 'Z@gmail.com', '789-7890', 'password123', '789 Main St', 'avatar.jpg'),
+(6, 'Phạm Văn X', 'X@gmail.com', '0123456783', '123456', '789 Main St', 'avatar3.jpg'),
+(7, 'Lê Thị Y', 'YYY@gmail.com', '0123456784', '123456', '789 Main St', 'avatar4.jpg'),
+(8, 'Nguyễn Văn Z', 'ZZZ@gmail.com', '0123456785', '123456', '789 Main St', 'avatar5.jpg'),
+(9, 'Trần Thị T', 'TT@gmail.com', '0123456786', '123456', '789 Main St', 'avatar6.jpg'),
+(10, 'Lê Văn S', 'S@gmail.com', '0123456787', '123456', '789 Main St', 'avatar7.jpg');
+
+SET IDENTITY_INSERT Users OFF;
+
 -- Bảng Students
 SET IDENTITY_INSERT Students ON;
 
-INSERT INTO Students (StudentID, StudentName, StudentEmail, Avatar, Address, PhoneNumber, Password)
+INSERT INTO Students (StudentID, UserID)
 VALUES
-(1, 'Nguyen Van A', 'A@example.com', 'avatar.jpg', '456 Main St', '224-3123', 'password123'),
-(2, 'Nguyen Thi C', 'C@example.com', 'avatar.jpg', '314 Main St', '523-5523', 'password123'),
-(3, 'Tran Minh X', 'Xstu@gmail.com', 'avatar.jpg', '512 Main St', '412-5124', 'password123'),
-(4, 'Tran Thi Y', 'Ystu@gmail.com', 'avatar.jpg', '123 Main St', '123-1234', 'password123'),
-(5, 'Le Van Z', 'Z@gmail,com', 'avatar.jpg', '789 Main St', '789-7890', 'password123');
-
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
 
 SET IDENTITY_INSERT Students OFF;
-
 
 -- Bảng Instructors
 SET IDENTITY_INSERT Instructors ON;
 
-INSERT INTO Instructors (InstructorID, InstructorName, InstructorDescription, Avatar, Email, PhoneNumber, Password)
+INSERT INTO Instructors (InstructorID, UserID, InstructorDescription)
 VALUES
-(1, 'Phạm Văn X', 'Giảng viên khoa học máy tính', 'avatar3.jpg', 'X@gmail.com', '0123456783', '123456'),
-(2, 'Lê Thị Y', 'Giảng viên toán học', 'avatar4.jpg', 'YYY@gmail.com', '0123456784', '123456'),
-(3, 'Nguyễn Văn Z', 'Giảng viên vật lý', 'avatar5.jpg', 'ZZZ@gmail.com', '0123456785', '123456'),
-(4, 'Trần Thị T', 'Giảng viên hóa học', 'avatar6.jpg', 'TT@gmail.com', '0123456786', '123456'),
-(5, 'Lê Văn S', 'Giảng viên sinh học', 'avatar7.jpg', 'S@gmail.com', '0123456787', '123456');
+(1, 6, 'Giảng viên khoa học máy tính'),
+(2, 7, 'Giảng viên toán học'),
+(3, 8, 'Giảng viên vật lý'),
+(4, 9, 'Giảng viên hóa học'),
+(5, 10, 'Giảng viên sinh học');
 
 SET IDENTITY_INSERT Instructors OFF;
 
@@ -207,12 +264,10 @@ SET IDENTITY_INSERT Instructors OFF;
 -- Bảng Admins
 SET IDENTITY_INSERT Admins ON;
 
-INSERT INTO Admins (AdminID, Name, Email, Password)
+INSERT INTO Admins (AdminID, UserID)
 VALUES
-(1, 'Admin C', 'TranVanC@gmail.com', '123456'),
-(2, 'Admin D', 'TranVanD@gmail.com', '123456'),
-(3, 'Admin E', 'TranVanE@gmail.com', '123456'),
-(4, 'Admin F', 'TranVanF@gmail.com', '123456');
+(1, 1),
+(2, 2);
 
 SET IDENTITY_INSERT Admins OFF;
 
