@@ -154,7 +154,7 @@ CREATE TABLE Orders (
     OrderID INT PRIMARY KEY IDENTITY,
     StudentID INT,
     Status NVARCHAR(50),
-    PaymentMethod NVARCHAR(50),
+    -- PaymentMethod NVARCHAR(50),
     OrderDate DATE,
     TotalAmount DECIMAL(10, 2),
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE
@@ -177,7 +177,30 @@ CREATE TABLE Payments (
     Amount DECIMAL(10, 2),
     PaymentCode NVARCHAR(100),
     PaymentDate DATE,
+    PaymentMethod NVARCHAR(50),
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE
+);
+
+--Momo
+CREATE TABLE MomoPayments (
+    PaymentID INT PRIMARY KEY,
+    PhoneNumber NVARCHAR(15),
+    FOREIGN KEY (PaymentID) REFERENCES Payments(PaymentID)
+);
+
+--Visa
+CREATE TABLE VisaPayments (
+    PaymentID INT PRIMARY KEY,
+    CardNumber NVARCHAR(20),
+    ExpirationDate DATE,
+    FOREIGN KEY (PaymentID) REFERENCES Payments(PaymentID)
+);
+
+--Internet Banking
+CREATE TABLE InternetBankingPayments (
+    PaymentID INT PRIMARY KEY,
+    BankName NVARCHAR(100),
+    FOREIGN KEY (PaymentID) REFERENCES Payments(PaymentID)
 );
 
 -- Mã giảm giá
@@ -392,18 +415,18 @@ SET IDENTITY_INSERT CartItems OFF;
 -- Bảng Orders
 SET IDENTITY_INSERT Orders ON;
 
-INSERT INTO Orders (OrderID, StudentID, Status, PaymentMethod, OrderDate, TotalAmount)
+INSERT INTO Orders (OrderID, StudentID, Status, OrderDate, TotalAmount)
 VALUES
-(1, 1, 'Paid', 'Credit Card', '2023-10-01', 100.00),
-(2, 2, 'Paid', 'Credit Card', '2023-10-02', 50.00),
-(3, 3, 'Paid', 'Credit Card', '2023-10-03', 100.00),
-(4, 4, 'Paid', 'Credit Card', '2023-10-04', 50.00),
-(5, 5, 'Paid', 'Credit Card', '2023-10-05', 100.00),
-(6, 1, 'Paid', 'Credit Card', '2023-10-01', 100.00),
-(7, 2, 'Paid', 'Credit Card', '2023-10-02', 50.00),
-(8, 3, 'Paid', 'Credit Card', '2023-10-03', 100.00),
-(9, 4, 'Paid', 'Credit Card', '2023-10-04', 50.00),
-(10, 5, 'Paid', 'Credit Card', '2023-10-05', 100.00);
+(1, 1, 'Paid', '2023-10-01', 100.00),
+(2, 2, 'Paid', '2023-10-02', 50.00),
+(3, 3, 'Paid', '2023-10-03', 100.00),
+(4, 4, 'Paid', '2023-10-04', 50.00),
+(5, 5, 'Paid', '2023-10-05', 100.00),
+(6, 1, 'Paid', '2023-10-01', 100.00),
+(7, 2, 'Paid', '2023-10-02', 50.00),
+(8, 3, 'Paid', '2023-10-03', 100.00),
+(9, 4, 'Paid', '2023-10-04', 50.00),
+(10, 5, 'Paid', '2023-10-05', 100.00);
 
 SET IDENTITY_INSERT Orders OFF;
 
