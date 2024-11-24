@@ -5,3 +5,4 @@ This project contains the SQL scripts to create and manage the database for an o
 ## Database Schema
 ![Schema](BTL1.drawio.png)
 
+![Mapping](Mapping.drawio.png)
