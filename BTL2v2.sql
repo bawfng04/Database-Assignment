@@ -170,3 +170,56 @@ CREATE TABLE Users(
 CREATE TABLE Admin(
     Admin_ID INT PRIMARY KEY
 )
+
+--Bài tập
+CREATE TABLE Exercise(
+    Exercise_Order INT,
+    Lesson_Order INT,
+    Course_ID INT,
+    Chapter_Name VARCHAR(255),
+    Exercise_Title VARCHAR(255),
+    Exercise_Solution TEXT,
+    Exercise_Number_Of_Correct_Answers INT,
+    Exercise_Content TEXT,
+)
+
+--Bài học
+CREATE TABLE Lesson (
+    Lesson_Order INT,
+    Course_ID INT,
+    Chapter_Name VARCHAR(255),
+    Lesson_Title VARCHAR(255),
+    Lesson_Content TEXT,
+    Lesson_Duration INT,
+)
+
+--Tài liệu
+CREATE TABLE Document(
+    Document_ID INT PRIMARY KEY,
+    Course_ID INT,
+    Document_Author VARCHAR(255),
+    Document_Title VARCHAR(255),
+    Document_Size INT,
+    Document_Type VARCHAR(255),
+)
+
+
+--Chương
+CREATE TABLE Chapter(
+    Chapter_Name VARCHAR(255),
+    Course_ID INT,
+    PRIMARY KEY (Chapter_Name, Course_ID),
+)
+
+--Bài kiểm tra
+
+CREATE TABLE Test(
+    Test_Order INT,
+    Chapter_Name VARCHAR(255),
+    Course_ID INT,
+    Test_Number_Of_Questions INT,
+    Test_Solution TEXT,
+    Test_TakenTimes INT,
+    Test_Number_Of_Correct_Answers INT,
+    Test_Content TEXT,
+)
