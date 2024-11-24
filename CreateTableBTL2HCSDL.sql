@@ -63,6 +63,12 @@ CREATE TABLE Categories (
     CategoryDescription NVARCHAR(255)
 );
 
+
+
+
+
+------------------------------------
+
 -- Tạo bảng khoá học
 CREATE TABLE Courses (
     CourseID INT PRIMARY KEY IDENTITY,
@@ -79,16 +85,76 @@ CREATE TABLE Courses (
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
 );
 
--- Nội dung của khoá học
-CREATE TABLE CourseContents (
-    ContentID INT PRIMARY KEY IDENTITY,
-    CourseID INT,
-    ContentDescription NVARCHAR(255),
+-- Chương của khoá học
+CREATE TABLE CourseChapter (
+    CourseID INT, -- cha
+    ChapterName NVARCHAR(100),
+    PRIMARY KEY(CourseID, ChapterName),
+    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE
+);
 
-    CONSTRAINT FK_CourseContents_Courses FOREIGN KEY (CourseID)
-        REFERENCES Courses(CourseID)
+-- Tài liệu của chương
+CREATE TABLE ChapterDocument (
+    CourseID INT,
+    ChapterName NVARCHAR(100),
+    DocumentID INT PRIMARY KEY IDENTITY,
+    DocumentName NVARCHAR(100),
+    DocumentContent VARBINARY(MAX),
+    FOREIGN KEY (CourseID, ChapterName)
+        REFERENCES CourseChapter(CourseID, ChapterName)
         ON DELETE CASCADE
 );
+
+-- Bài học của chương
+CREATE TABLE ChapterLessons (
+    CourseID INT,
+    ChapterName NVARCHAR(100),
+    LessonOrder INT,
+    LessonDuration INT,
+    LessonName NVARCHAR(100),
+    LessonContent NVARCHAR(255),
+    PRIMARY KEY (LessonOrder, CourseID, ChapterName),
+    FOREIGN KEY (CourseID, ChapterName)
+        REFERENCES CourseChapter (CourseID, ChapterName)
+        ON DELETE CASCADE
+);
+
+-- Bài tập cho bài học
+CREATE TABLE LessonExercises(
+    CourseID INT,
+    ChapterName NVARCHAR(100),
+    LessonOrder INT,
+    ExerciseOrder INT,
+    ExerciseName NVARCHAR(100),
+    ExerciseAnswer NVARCHAR(255),
+    ExerciseQuestionNumber INT,
+    ExerciseContent NVARCHAR(255),
+    PRIMARY KEY(ExerciseOrder, LessonOrder, ChapterName, CourseID),
+    FOREIGN KEY (LessonOrder, CourseID, ChapterName)
+        REFERENCES ChapterLessons(LessonOrder, CourseID, ChapterName)
+        ON DELETE CASCADE
+);
+
+
+-- Bài kiểm tra cho chương
+CREATE TABLE ChapterTests(
+    CourseID INT,
+    ChapterName NVARCHAR(100),
+    TestOrder INT,
+    TestTime INT,
+    TestAnswer NVARCHAR(255),
+    TestNumOfQuestions INT,
+    TestNumOfCorrectAnswer INT,
+    Score AS (CAST(TestNumOfCorrectAnswer * 10.0 / TestNumOfQuestions AS DECIMAL(5,2))),
+    TestContent NVARCHAR(255),
+    PRIMARY KEY(TestOrder, ChapterName, CourseID),
+    FOREIGN KEY (CourseID, ChapterName)
+        REFERENCES CourseChapter(CourseID, ChapterName)
+        ON DELETE CASCADE
+);
+
+
+-----------------------------------------
 
 -- Bảng đánh giá
 CREATE TABLE Reviews (
@@ -301,33 +367,31 @@ VALUES
 SET IDENTITY_INSERT Courses OFF;
 
 
--- Bảng CourseContents
-SET IDENTITY_INSERT CourseContents ON;
+-- Bảng CourseChapter
 
-INSERT INTO CourseContents (ContentID, CourseID, ContentDescription)
+
+INSERT INTO CourseChapter (CourseID, ChapterName)
 VALUES
-(1, 1, 'Introduction to C++'),
-(2, 1, 'Basic syntax of C++'),
-(3, 2, 'Introduction to recursion'),
-(4, 2, 'Recursion in math'),
-(5, 3, 'Introduction to physics'),
-(6, 3, 'Basic physics concepts'),
-(7, 4, 'Introduction to chemistry'),
-(8, 4, 'Basic chemistry concepts'),
-(9, 5, 'Introduction to biology'),
-(10, 5, 'Basic biology concepts'),
-(11, 6, 'Introduction to history'),
-(12, 6, 'Basic history concepts'),
-(13, 7, 'Introduction to geography'),
-(14, 7, 'Basic geography concepts'),
-(15, 8, 'Introduction to literature'),
-(16, 8, 'Basic literature concepts'),
-(17, 9, 'Introduction to music'),
-(18, 9, 'Basic music concepts'),
-(19, 10, 'Introduction to art'),
-(20, 10, 'Basic art concepts');
-
-SET IDENTITY_INSERT CourseContents OFF;
+(1, 'Chapter 1'),
+(1, 'Chapter 2'),
+(2, 'Chapter 1'),
+(2, 'Chapter 2'),
+(3, 'Chapter 1'),
+(3, 'Chapter 2'),
+(4, 'Chapter 1'),
+(4, 'Chapter 2'),
+(5, 'Chapter 1'),
+(5, 'Chapter 2'),
+(6, 'Chapter 1'),
+(6, 'Chapter 2'),
+(7, 'Chapter 1'),
+(7, 'Chapter 2'),
+(8, 'Chapter 1'),
+(8, 'Chapter 2'),
+(9, 'Chapter 1'),
+(9, 'Chapter 2'),
+(10, 'Chapter 1'),
+(10, 'Chapter 2');
 
 
 -- Bảng Reviews
