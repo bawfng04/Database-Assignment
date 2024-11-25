@@ -699,3 +699,79 @@ EXEC DeleteCourse 501;
 
 --Trigger
 
+-- Trigger 1: Kiểm tra thời gian bắt đầu và kết thúc của khóa học
+
+GO
+CREATE TRIGGER tr_CheckCourseDates
+ON Course
+INSTEAD OF INSERT
+AS
+BEGIN
+    -- Kiểm tra xem thời gian bắt đầu và kết thúc hợp lệ hay không
+    IF EXISTS (SELECT 1 FROM inserted WHERE  Course_Start_Date >= Course_End_Date)
+    BEGIN
+        RAISERROR('Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc của khóa học.', 16, 1);
+        RETURN;
+    END;
+
+    -- Thêm dữ liệu mới vào bảng Course nếu hợp lệ
+    INSERT INTO Course (Course_ID, Course_Name, Course_Status, Course_Description, Course_Price, Course_Image, Course_Start_Date, Course_End_Date, Course_Categories_ID)
+    SELECT Course_ID, Course_Name, Course_Status, Course_Description, Course_Price, Course_Image, Course_Start_Date, Course_End_Date, Course_Categories_ID
+    FROM inserted;
+
+    -- Thông báo thành công
+    SELECT 'Khóa học đã được thêm thành công!';
+END;
+GO
+
+
+-- Trigger 2: Kiểm tra giá trị giảm giá khi thêm phiếu giảm giá mới
+CREATE TRIGGER tr_CheckCouponValue
+ON Coupon
+INSTEAD OF INSERT
+AS
+BEGIN
+    -- Kiểm tra xem giá trị giảm giá có hợp lệ (không âm) hay không
+    IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Value < 0)
+    BEGIN
+        RAISERROR('Giá trị giảm giá phải là số không âm.', 16, 1);
+        RETURN;
+    END;
+
+    -- Kiểm tra xem loại giảm giá có hợp lệ hay không
+    IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Type NOT IN ('Percent', 'Fixed'))
+    BEGIN
+        RAISERROR('Loại giảm giá phải là "Percent" hoặc "Fixed".', 16, 1);
+        RETURN;
+    END;
+
+    -- Kiểm tra xem ngày bắt đầu có nhỏ hơn ngày kết thúc hay không
+    IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Start_Date >= Coupon_Expiry_Date)
+    BEGIN
+        RAISERROR('Ngày bắt đầu phải nhỏ hơn ngày kết thúc.', 16, 1);
+        RETURN;
+    END;
+
+    -- Kiểm tra xem giá trị giảm giá tối đa có hợp lệ (không âm) hay không
+    IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Max_Discount < 0)
+    BEGIN
+        RAISERROR('Giá trị giảm giá tối đa phải là số không âm.', 16, 1);
+        RETURN;
+    END;
+
+    -- Thêm phiếu giảm giá mới vào bảng Coupon nếu hợp lệ
+    INSERT INTO Coupon (Coupon_ID, Coupon_Title, Coupon_Value, Coupon_Type, Coupon_Start_Date, Coupon_Expiry_Date, Coupon_Max_Discount)
+    SELECT Coupon_ID, Coupon_Title, Coupon_Value, Coupon_Type, Coupon_Start_Date, Coupon_Expiry_Date, Coupon_Max_Discount
+    FROM inserted;
+
+    -- Thông báo thành công
+    SELECT 'Phiếu giảm giá đã được thêm thành công!';
+END;
+GO
+
+
+
+
+-- Thủ tục
+
+-- Hàm
