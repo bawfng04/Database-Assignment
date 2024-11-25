@@ -355,6 +355,8 @@ VALUES
     (10, 'Phân tích dữ liệu với Python', 'Open', 'Khóa học chuyên sâu về phân tích dữ liệu và trực quan hóa với Python.', 800, 'data_analysis.jpg', '2024-02-01', '2024-08-31', 1);
 
 
+
+
 INSERT INTO Edit(Edit_ID, Edit_Time, Edit_Content, Edit_Admin_ID, Edit_Coupon_ID, Edit_Course_ID)
 VALUES
     (1, '2023-05-02', 'Cập nhật nội dung khóa học Python cơ bản.', 1, 1, 1),
@@ -530,4 +532,170 @@ VALUES
     (9, 'Nguyên lý cơ bản trong Marketing', 9, 15, 'Solution 9', 6, 12, 'Câu hỏi kiểm tra các nguyên lý cơ bản trong marketing.'),
     (10, 'Phân tích dữ liệu nâng cao với Python', 10, 20, 'Solution 10', 10, 18, 'Câu hỏi kiểm tra khả năng phân tích dữ liệu với Python và Pandas.');
 
+
+
+
+
+
+----------------------------------FUNCTION - TRIGGER - PROCEDURE----------------------------------
+
+
+-- Thủ tục
+--a. Insert: InsertCourse - Thêm một khóa học mới vào bảng Course
+GO
+CREATE PROCEDURE InsertCourse(
+    @p_Course_ID INT,
+    @p_Course_Name VARCHAR(255),
+    @p_Course_Status VARCHAR(255),
+    @p_Course_Description TEXT,
+    @p_Course_Price INT,
+    @p_Course_Image TEXT,
+    @p_Course_Start_Date DATE,
+    @p_Course_End_Date DATE,
+    @p_Course_Categories_ID INT
+)
+AS
+BEGIN
+    -- Kiểm tra xem danh mục có tồn tại không
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Categories
+        WHERE Categories_ID = @p_Course_Categories_ID
+    )
+    BEGIN
+        RAISERROR('Danh mục không tồn tại!', 16, 1);
+        RETURN;
+    END;
+
+    -- Thêm dữ liệu vào bảng Course
+    INSERT INTO Course(
+        Course_ID,
+        Course_Name,
+        Course_Status,
+        Course_Description,
+        Course_Price,
+        Course_Image,
+        Course_Start_Date,
+        Course_End_Date,
+        Course_Categories_ID
+    )
+    VALUES (
+        @P_Course_ID,
+        @p_Course_Name,
+        @p_Course_Status,
+        @p_Course_Description,
+        @p_Course_Price,
+        @p_Course_Image,
+        @p_Course_Start_Date,
+        @p_Course_End_Date,
+        @p_Course_Categories_ID
+    );
+
+    -- Lấy giá trị Course_ID vừa được tạo
+    DECLARE @NewCourseID INT;
+    SET @NewCourseID = SCOPE_IDENTITY();
+
+    -- Thông báo thành công
+    SELECT CONCAT(@p_Course_ID, 'Khóa học "', @p_Course_Name, '" đã được thêm thành công với Course_ID = ', @NewCourseID, '!');
+END;
+
+EXEC InsertCourse 501, 'Lập trình C++ cơ bản', 'Open', 'Khóa học giúp bạn nắm vững các kiến thức cơ bản về C++.', 400, 'c++_basic.jpg', '2024-01-01', '2024-06-30', 1;
+
+
+--b. Update: UpdateCourse - Cập nhật thông tin của một khóa học
+GO
+CREATE PROCEDURE UpdateCourse(
+    @p_Course_ID INT,
+    @p_Course_Name VARCHAR(255),
+    @p_Course_Status VARCHAR(255),
+    @p_Course_Description TEXT,
+    @p_Course_Price INT,
+    @p_Course_Image TEXT,
+    @p_Course_Start_Date DATE,
+    @p_Course_End_Date DATE,
+    @p_Course_Categories_ID INT
+)
+
+AS
+
+BEGIN
+    -- Kiểm tra xem khóa học có tồn tại không
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Course
+        WHERE Course_ID = @p_Course_ID
+    )
+    BEGIN
+        RAISERROR('Khóa học không tồn tại!', 16, 1);
+        RETURN;
+    END;
+
+    -- Kiểm tra xem danh mục có tồn tại không
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Categories
+        WHERE Categories_ID = @p_Course_Categories_ID
+    )
+    BEGIN
+        RAISERROR('Danh mục không tồn tại!', 16, 1);
+        RETURN;
+    END;
+
+    -- Cập nhật thông tin khóa học
+    UPDATE Course
+    SET
+        Course_Name = @p_Course_Name,
+        Course_Status = @p_Course_Status,
+        Course_Description = @p_Course_Description,
+        Course_Price = @p_Course_Price,
+        Course_Image = @p_Course_Image,
+        Course_Start_Date = @p_Course_Start_Date,
+        Course_End_Date = @p_Course_End_Date,
+        Course_Categories_ID = @p_Course_Categories_ID
+    WHERE Course_ID = @p_Course_ID;
+
+    -- Thông báo thành công
+    SELECT CONCAT('Khóa học "', @p_Course_Name, '" đã được cập nhật thành công!');
+END;
+
+
+EXEC UpdateCourse 501, 'Lập trình C++ cơ bản', 'Open', 'Khóa học giúp bạn nắm vững các kiến thức cơ bản về C++.', 500, 'c++_basic.jpg', '2024-01-01', '2024-06-30', 1;
+
+
+
+--c. Delete: DeleteCourse - Xóa một khóa học khỏi bảng Course
+
+GO
+CREATE PROCEDURE DeleteCourse(
+    @p_Course_ID INT
+)
+AS
+
+BEGIN
+    -- Kiểm tra xem khóa học có tồn tại không
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Course
+        WHERE Course_ID = @p_Course_ID
+    )
+    BEGIN
+        RAISERROR('Khóa học không tồn tại!', 16, 1);
+        RETURN;
+    END;
+
+    -- Xóa khóa học
+    DELETE FROM Course
+    WHERE Course_ID = @p_Course_ID;
+
+    -- Thông báo thành công
+    SELECT CONCAT('Khóa học có Course_ID = ', @p_Course_ID, ' đã được xóa thành công!');
+END;
+
+EXEC DeleteCourse 501;
+
+
+
+
+
+--Trigger
 
