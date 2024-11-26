@@ -658,10 +658,9 @@ BEGIN
     SET @NewCourseID = SCOPE_IDENTITY();
 
     -- Thông báo thành công
-    SELECT CONCAT(@p_Course_ID, 'Khóa học "', @p_Course_Name, '" đã được thêm thành công với Course_ID = ', @NewCourseID, '!');
+    SELECT CONCAT(N'Khóa học "', @p_Course_Name, N'" đã được thêm thành công với Course_ID = ', @NewCourseID, '!');
 END;
-
-EXEC InsertCourse 501, 'Lập trình C++ cơ bản', 'Open', 'Khóa học giúp bạn nắm vững các kiến thức cơ bản về C++.', 400, 'c++_basic.jpg', '2024-01-01', '2024-06-30', 1;
+EXEC InsertCourse 503, N'Lập trình JAVA cơ bản', 'Open', N'Khóa học giúp bạn nắm vững các kiến thức cơ bản về JAVA.', 400, 'java_basic.jpg', '2024-01-01', '2024-06-30', 1;
 
 
 --b. Update: UpdateCourse - Cập nhật thông tin của một khóa học
@@ -715,12 +714,12 @@ BEGIN
     WHERE Course_ID = @p_Course_ID;
 
     -- Thông báo thành công
-    SELECT CONCAT('Khóa học "', @p_Course_Name, '" đã được cập nhật thành công!');
+    SELECT CONCAT(N'Khóa học "', @p_Course_Name, N'" đã được cập nhật thành công!');
 END;
 
-
-EXEC UpdateCourse 501, 'Lập trình C++ cơ bản', 'Open', 'Khóa học giúp bạn nắm vững các kiến thức cơ bản về C++.', 500, 'c++_basic.jpg', '2024-01-01', '2024-06-30', 1;
-
+EXEC UpdateCourse 501, N'Lập trình C++ cơ bản', 'Open', N'Khóa học giúp bạn nắm vững các kiến thức cơ bản về C++.', 500, 'c++_basic.jpg', '2024-01-01', '2024-06-30', 1;
+SELECT * FROM Course
+WHERE Course_ID=501
 
 
 --c. Delete: DeleteCourse - Xóa một khóa học khỏi bảng Course
@@ -748,10 +747,9 @@ BEGIN
     WHERE Course_ID = @p_Course_ID;
 
     -- Thông báo thành công
-    SELECT CONCAT('Khóa học có Course_ID = ', @p_Course_ID, ' đã được xóa thành công!');
+    SELECT CONCAT(N'Khóa học có Course_ID = ', @p_Course_ID, N' đã được xóa thành công!');
 END;
-
-EXEC DeleteCourse 501;
+EXEC DeleteCourse 502;
 
 
 
@@ -782,6 +780,11 @@ BEGIN
     -- Thông báo thành công
     SELECT N'Khóa học đã được thêm thành công!';
 END;
+INSERT INTO Course(Course_ID, Course_Name, Course_Status, Course_Description, Course_Price, Course_Image, Course_Start_Date, Course_End_Date, Course_Categories_ID)
+VALUES
+	(100, N'Phân tích dữ liệu với Python', 'Open', N'Khóa học chuyên sâu về phân tích dữ liệu và trực quan hóa với Python.', 800, 'data_analysis.jpg', '2024-09-01', '2024-08-31', 1);
+
+
 
 -- Trigger 2: Kiểm tra giá trị giảm giá khi thêm phiếu giảm giá mới
 GO
@@ -793,34 +796,34 @@ BEGIN
     -- Kiểm tra xem giá trị giảm giá có hợp lệ (không âm) hay không
     IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Value < 0)
     BEGIN
-        RAISERROR('Giá trị giảm giá phải là số không âm.', 16, 1);
+        RAISERROR(N'Giá trị giảm giá phải là số không âm.', 16, 1);
         RETURN;
     END;
 
     -- Kiểm tra xem loại giảm giá có hợp lệ hay không
     IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Type NOT IN ('Percent', 'Fixed'))
     BEGIN
-        RAISERROR('Loại giảm giá phải là "Percent" hoặc "Fixed".', 16, 1);
+        RAISERROR(N'Loại giảm giá phải là "Percent" hoặc "Fixed".', 16, 1);
         RETURN;
     END;
 
     -- Kiểm tra xem ngày bắt đầu có nhỏ hơn ngày kết thúc hay không
     IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Start_Date >= Coupon_Expiry_Date)
     BEGIN
-        RAISERROR('Ngày bắt đầu phải nhỏ hơn ngày kết thúc.', 16, 1);
+        RAISERROR(N'Ngày bắt đầu phải nhỏ hơn ngày kết thúc.', 16, 1);
         RETURN;
     END;
 
     -- Kiểm tra xem giá trị giảm giá tối đa có hợp lệ (không âm) hay không
     IF EXISTS (SELECT 1 FROM inserted WHERE Coupon_Max_Discount < 0)
     BEGIN
-        RAISERROR('Giá trị giảm giá tối đa phải là số không âm.', 16, 1);
+        RAISERROR(N'Giá trị giảm giá tối đa phải là số không âm.', 16, 1);
         RETURN;
     END;
 	-- Kiểm tra xem giá trị giảm giá có lớn hơn giá trị giảm giá tối đa không
 	IF EXISTS (SELECT 1 FROM inserted where Coupon_Value>Coupon_Max_Discount)
 	BEGIN
-		RAISERROR('Giảm giá vượt giới hạn', 16,1);
+		RAISERROR(N'Giảm giá vượt giới hạn', 16,1);
 		RETURN;
 	END;
 
@@ -831,24 +834,27 @@ BEGIN
     -- Thông báo thành công
     SELECT N'Phiếu giảm giá đã được thêm thành công!';
 END;
+INSERT INTO Coupon(Coupon_ID, Coupon_Title, Coupon_Value, Coupon_Type, Coupon_Start_Date, Coupon_Expiry_Date, Coupon_Max_Discount)
+VALUES
+    (1, N'Giảm giá khai trương', -9, 'Percent', '2023-01-01', '2023-12-31', 30);
 
---trigger 3 mỗi khi thêm khóa học vào giỏ hàng thì cập nhật giá khóa học
+
+--trigger 3 mỗi khi thêm phiếu giảm giá vào khóa học thì cập nhật giá khóa học
 GO
 CREATE TRIGGER tr_UpdateCoursePrice
 ON Course_Coupon
 AFTER INSERT
 AS
 BEGIN
-    -- Cập nhật giá khóa học
-    UPDATE Course
-    SET Course_Price =
+    UPDATE cr
+    SET Cr.Course_Price =
         CASE
             WHEN c.Coupon_Type = 'Percent'
-                THEN Course_Price * (1 - c.Coupon_Value/100.0)
+                THEN cr.Course_Price * (1 - c.Coupon_Value/100.0)
             ELSE
                 CASE
-                    WHEN Course_Price > c.Coupon_Value
-                        THEN Course_Price - c.Coupon_Value
+                    WHEN cr.Course_Price > c.Coupon_Value
+                        THEN cr.Course_Price - c.Coupon_Value
                     ELSE 0
                 END
         END
@@ -856,16 +862,16 @@ BEGIN
     JOIN inserted i ON cr.Course_ID = i.Course_ID
     JOIN Coupon c ON c.Coupon_ID = i.Coupon_ID;
 
-    -- Thông báo thành công
     SELECT N'Đã cập nhật giá khóa học thành công!';
 END;
-
-GO
-INSERT INTO Coupon(Coupon_ID, Coupon_Title, Coupon_Value, Coupon_Type, Coupon_Start_Date, Coupon_Expiry_Date, Coupon_Max_Discount)
-VALUES
-	(6, N'Giảm giá giáng sinh', 40, 'Percent', '2023-01-01', '2023-12-31', 30);
+SELECT * FROM Course
+SELECT * FROM Course_Coupon
 SELECT * FROM Coupon
-
+INSERT Course_Coupon(Course_ID,Coupon_ID)
+VALUES
+	(6,5);
+SELECT * FROM Course as C
+WHERE C.Course_ID=6
 -- Thủ tục 1 tính toán các giá trị liên quan khóa học
 GO
 CREATE PROCEDURE GetCourseStatistics
@@ -981,6 +987,7 @@ BEGIN
 
     RETURN @Total
 END;
+
 GO
 
 SELECT * FROM Course
