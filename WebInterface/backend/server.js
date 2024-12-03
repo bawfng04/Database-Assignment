@@ -16,25 +16,21 @@ const config = {
   authentication: {
     type: "ntlm",
     options: {
-      domain: "NPM-SASS", // Replace with your domain
-      userName: "nguye", // Replace with your Windows username
-      password: "", // Leave empty for Windows Authentication
+      domain: "NPM-SASS",
     },
   },
 };
-
 sql
   .connect(config)
   .then(() => {
     console.log("Connected to the database");
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
   })
   .catch((err) => {
     console.error("Database connection error:", err);
   });
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
 
 sql
   .connect(config)
