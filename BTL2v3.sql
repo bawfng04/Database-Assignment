@@ -1,4 +1,6 @@
 
+---------------------- TẠO DATABASE --------------------------------
+
 --Người dùng hệ thống
 CREATE TABLE Users(
     UsernameID INT IDENTITY (1,1) PRIMARY KEY,
@@ -24,55 +26,19 @@ CREATE TABLE Teacher(
     FOREIGN KEY (TeacherID) REFERENCES Users(UsernameID),
 )
 
---Giỏ hàng
-CREATE TABLE Cart(
-    CartID INT IDENTITY (1,1) PRIMARY KEY,
-);
-
---Bảng học viên
-CREATE TABLE Student(
-    StudentID INT IDENTITY (1,1) PRIMARY KEY,
-    CardID INT,
-    OptionName VARCHAR(255),
-    QuestionID INT,
-
-    FOREIGN KEY (StudentID) REFERENCES Users(UsernameID),
-    FOREIGN KEY (CardID) REFERENCES Card(CardID),
-    FOREIGN KEY (OptionName) REFERENCES Options(OptionName),
-    FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID),
-)
-
---Người đại diện
-CREATE TABLE Guardian(
-    GuardianID INT IDENTITY (1,1) PRIMARY KEY,
-    StudentID INT,
-    GuardianName VARCHAR(255),
-    GuardianEmail VARCHAR(255),
-    GuardianPhone VARCHAR(10),
-
-    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
-)
-
-
-
---Đơn hàng
-CREATE TABLE Orders(
-    OrderID INT IDENTITY (1,1) PRIMARY KEY,
-    OrderPaymentStatus VARCHAR(255),
-    OrderDate DATE,
-    OrderPaymentCode VARCHAR(255),
-    StudentID INT,
-
-    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
-    FOREIGN KEY (OrderPaymentCode) REFERENCES PaymentMethod(PaymentCode),
-)
-
 --Bảng danh mục
 CREATE TABLE Category(
     CategoryID INT IDENTITY (1,1) PRIMARY KEY,
     CategoryName VARCHAR(255),
     CategoryDescription VARCHAR(255),
 );
+
+
+--Giỏ hàng
+CREATE TABLE Cart(
+    CartID INT IDENTITY (1,1) PRIMARY KEY,
+);
+
 
 --Bảng khoá học
 CREATE TABLE Course(
@@ -88,6 +54,124 @@ CREATE TABLE Course(
 
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
 );
+
+
+--Chương
+CREATE TABLE Chapter(
+    ChapterName VARCHAR(255),
+    CourseID INT,
+
+    PRIMARY KEY (ChapterName, CourseID),
+    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
+);
+
+--Tài liệu
+CREATE TABLE Document(
+    DocumentID INT IDENTITY (1,1) PRIMARY KEY,
+    CourseID INT,
+    ChapterName VARCHAR(255),
+    DocumentAuthor VARCHAR(255),
+    DocumentTitle VARCHAR(255),
+    DocumentSize INT,
+    DocumentType VARCHAR(255),
+    DocumentContent VARCHAR(255),
+
+    FOREIGN KEY (ChapterName, CourseID) REFERENCES Chapter(ChapterName, CourseID)
+);
+
+--Bài học
+CREATE TABLE Lesson(
+    LessonOrder INT,
+    CourseID INT,
+    ChapterName VARCHAR(255),
+    LessonTitle VARCHAR(255),
+    LessonContent VARCHAR(255),
+    LessonDuraion TIME,
+
+    PRIMARY KEY (LessonOrder, CourseID, ChapterName),
+    FOREIGN KEY (ChapterName, CourseID) REFERENCES Chapter(ChapterName, CourseID),
+)
+
+--Bài tập
+CREATE TABLE Exercise(
+    ExerciseOrder INT,
+    LessonOrder INT,
+    CourseID INT,
+    ChapterName VARCHAR(255),
+    ExerciseTitle VARCHAR(255),
+    ExerciseAnswer VARCHAR(255),
+    ExerciseCorrectAnswerNumber INT,
+    ExerciseContent VARCHAR(255),
+
+    PRIMARY KEY (ExerciseOrder, LessonOrder, CourseID, ChapterName),
+
+    FOREIGN KEY (LessonOrder, CourseID, ChapterName) REFERENCES Lesson(LessonOrder, CourseID, ChapterName),
+)
+
+--Bài kiểm tra
+CREATE TABLE Test(
+    TestOrder INT,
+    CourseID INT,
+    ChapterName VARCHAR(255),
+    TestDuration TIME,
+
+    PRIMARY KEY (TestOrder, CourseID, ChapterName),
+    FOREIGN KEY (ChapterName, CourseID) REFERENCES Chapter(ChapterName, CourseID),
+)
+
+--Câu hỏi
+CREATE TABLE Question(
+    QuestionID INT IDENTITY (1,1) PRIMARY KEY,
+    QuestionScore INT,
+    QuestionContent VARCHAR(255),
+)
+
+--Lựa chọn
+CREATE TABLE Options(
+    QuestionID INT,
+    OptionName VARCHAR(255) UNIQUE,
+    IsCorrect BIT, --Đúng hay sai
+    OptionContent VARCHAR(255), --Nội dung lựa chọn
+
+    PRIMARY KEY (QuestionID, OptionName),
+    FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID),
+)
+
+--Câu hỏi thuộc bài kiểm tra
+CREATE TABLE QuestionTest(
+    QuestionID INT,
+    TestOrder INT,
+    CourseID INT,
+    ChapterName VARCHAR(255),
+
+    PRIMARY KEY (QuestionID, TestOrder, CourseID, ChapterName),
+    FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID),
+    FOREIGN KEY (TestOrder, CourseID, ChapterName) REFERENCES Test(TestOrder, CourseID, ChapterName),
+)
+
+--Bảng học viên
+CREATE TABLE Student(
+    StudentID INT IDENTITY (1,1) PRIMARY KEY,
+    CartID INT,
+    OptionName VARCHAR(255),
+    QuestionID INT,
+
+    FOREIGN KEY (StudentID) REFERENCES Users(UsernameID),
+    FOREIGN KEY (CartID) REFERENCES Cart(CartID),
+    FOREIGN KEY (OptionName) REFERENCES Options(OptionName),
+    FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID),
+)
+
+--Người đại diện
+CREATE TABLE Guardian(
+    GuardianID INT IDENTITY (1,1) PRIMARY KEY,
+    StudentID INT,
+    GuardianName VARCHAR(255),
+    GuardianEmail VARCHAR(255),
+    GuardianPhone VARCHAR(10),
+
+    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
+)
 
 --Giảng viên dạy khoá học
 CREATE TABLE TeacherCourse(
@@ -124,17 +208,6 @@ CREATE TABLE Edit (
     FOREIGN KEY (EditCouponID) REFERENCES Coupon(CouponID),
 );
 
-
---Phiếu giảm giá thuộc giỏ hàng
-CREATE TABLE CouponCart(
-    CouponID INT,
-    CartID INT,
-
-    PRIMARY KEY (CouponID, CartID),
-    FOREIGN KEY (CouponID) REFERENCES Coupon(CouponID),
-    FOREIGN KEY (CartID) REFERENCES Cart(CartID),
-)
-
 --Khoá học thuộc giỏ hàng
 CREATE TABLE CourseCart(
     CourseID INT,
@@ -157,15 +230,6 @@ CREATE TABLE CourseStudent(
     FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
 )
 
---Khoá học thêm vào đơn hàng
-CREATE TABLE CourseOrder(
-    CourseID INT,
-    OrderID INT,
-
-    PRIMARY KEY (CourseID, OrderID),
-    FOREIGN KEY (CourseID) REFERENCES Course(CourseID),
-    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
-)
 
 --Đánh giá
 CREATE TABLE Review(
@@ -184,7 +248,6 @@ CREATE TABLE PaymentMethod(
     PaymentCode VARCHAR(255) PRIMARY KEY, --mã thanh toán
     PayerName VARCHAR(255),
     PaymentDate DATE,
-
 )
 
 --Momo
@@ -213,103 +276,26 @@ CREATE TABLE VISA(
 )
 
 
---Chương
-CREATE TABLE Chapter(
-    ChapterName VARCHAR(255),
-    CourseID INT,
+--Đơn hàng
+CREATE TABLE Orders(
+    OrderID INT IDENTITY (1,1) PRIMARY KEY,
+    OrderPaymentStatus VARCHAR(255),
+    OrderDate DATE,
+    OrderPaymentCode VARCHAR(255),
+    StudentID INT,
+    CouponID INT,
 
-    PRIMARY KEY (ChapterName, CourseID),
+    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
+    FOREIGN KEY (OrderPaymentCode) REFERENCES PaymentMethod(PaymentCode),
+    FOREIGN KEY (CouponID) REFERENCES Coupon(CouponID),
+)
+
+--Khoá học thêm vào đơn hàng
+CREATE TABLE CourseOrder(
+    CourseID INT,
+    OrderID INT,
+
+    PRIMARY KEY (CourseID, OrderID),
     FOREIGN KEY (CourseID) REFERENCES Course(CourseID),
-)
-
---Tài liệu
-CREATE TABLE Document(
-    DocumentID INT IDENTITY (1,1) PRIMARY KEY,
-    CourseID INT,
-    ChapterName VARCHAR(255),
-    DocumentAuthor VARCHAR(255),
-    DocumentTitle VARCHAR(255),
-    DocumentSize INT,
-    DocumentType VARCHAR(255),
-    DocumentContent VARCHAR(255),
-
-    FOREIGN KEY (CourseID) REFERENCES Chapter(CourseID),
-    FOREIGN KEY (ChapterName) REFERENCES Chapter(ChapterName),
-)
-
---Bài học
-CREATE TABLE Lesson(
-    LessonOrder INT,
-    CourseID INT,
-    ChapterName VARCHAR(255),
-    LessonTitle VARCHAR(255),
-    LessonContent VARCHAR(255),
-    LessonDuraion TIME,
-
-    PRIMARY KEY (LessonOrder, CourseID, ChapterName),
-    FOREIGN KEY (CourseID) REFERENCES Chapter(CourseID),
-    FOREIGN KEY (ChapterName) REFERENCES Chapter(ChapterName),
-)
-
---Bài tập
-CREATE TABLE Exercise(
-    ExerciseOrder INT,
-    LessonOrder INT,
-    CourseID INT,
-    ChapterName VARCHAR(255),
-    ExerciseTitle VARCHAR(255),
-    ExerciseAnswer VARCHAR(255),
-    ExerciseCorrectAnswerNumber INT,
-    ExerciseContent VARCHAR(255),
-
-    PRIMARY KEY (ExerciseOrder, LessonOrder, CourseID, ChapterName),
-
-    FOREIGN KEY (LessonOrder) REFERENCES Lesson(LessonOrder),
-    FOREIGN KEY (CourseID) REFERENCES Lesson(CourseID),
-    FOREIGN KEY (ChapterName) REFERENCES Lesson(ChapterName),
-
-)
-
---Bài kiểm tra
-CREATE TABLE Test(
-    TestOrder INT,
-    CourseID INT,
-    ChapterName VARCHAR(255),
-    TestDuration TIME,
-
-    PRIMARY KEY (TestOrder, CourseID, ChapterName),
-    FOREIGN KEY (CourseID) REFERENCES Chapter(CourseID),
-    FOREIGN KEY (ChapterName) REFERENCES Chapter(ChapterName),
-)
-
---Câu hỏi
-CREATE TABLE Question(
-    QuestionID INT IDENTITY (1,1) PRIMARY KEY,
-    QuestionScore INT,
-    QuestionContent VARCHAR(255),
-)
-
---Câu hỏi thuộc bài kiểm tra
-CREATE TABLE QuestionTest(
-    QuestionID INT,
-    TestOrder INT,
-    CourseID INT,
-    ChapterName VARCHAR(255),
-
-    PRIMARY KEY (QuestionID, TestOrder, CourseID, ChapterName),
-    FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID),
-    FOREIGN KEY (TestOrder) REFERENCES Test(TestOrder),
-    FOREIGN KEY (CourseID) REFERENCES Test(CourseID),
-    FOREIGN KEY (ChapterName) REFERENCES Test(ChapterName),
-)
-
---Lựa chọn
-CREATE TABLE Options(
-    QuestionID INT,
-    OptionName VARCHAR(255), --Tên lựa chọn
-    IsCorrect BIT, --Đúng hay sai
-    OptionContent VARCHAR(255), --Nội dung lựa chọn
-
-    PRIMARY KEY (QuestionID, OptionName),
-    FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
 )
