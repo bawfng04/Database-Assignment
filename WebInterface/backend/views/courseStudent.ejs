@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Course Student</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Course Student</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>CourseID</th>
+        <th>StudentID</th>
+        <th>CourseProgress</th>
+        <th>ReviewScore</th>
+        <th>ReviewContent</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% courseStudent.forEach(cs => { %>
+        <tr>
+          <td><%= cs.CourseID %></td>
+          <td><%= cs.StudentID %></td>
+          <td><%= cs.CourseProgress %></td>
+          <td><%= cs.ReviewScore %></td>
+          <td><%= cs.ReviewContent %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

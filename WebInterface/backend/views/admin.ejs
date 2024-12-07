@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Admin</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>AdminID</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% admin.forEach(adminUser => { %>
+        <tr>
+          <td><%= adminUser.AdminID %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

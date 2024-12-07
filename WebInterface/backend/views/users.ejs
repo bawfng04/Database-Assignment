@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Users</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Users</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>UsernameID</th>
+        <th>UserEmail</th>
+        <th>UserPhone</th>
+        <th>UserPassword</th>
+        <th>UserAddress</th>
+        <th>UserImage</th>
+        <th>Username</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(user => { %>
+        <tr>
+          <td><%= user.UsernameID %></td>
+          <td><%= user.UserEmail %></td>
+          <td><%= user.UserPhone %></td>
+          <td><%= user.UserPassword %></td>
+          <td><%= user.UserAddress %></td>
+          <td><%= user.UserImage %></td>
+          <td><%= user.Username %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Orders</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Orders</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>OrderID</th>
+        <th>OrderPaymentStatus</th>
+        <th>OrderDate</th>
+        <th>OrderTotalAmount</th>
+        <th>CartID</th>
+        <th>PaymentCode</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(order => { %>
+        <tr>
+          <td><%= order.OrderID %></td>
+          <td><%= order.OrderPaymentStatus %></td>
+          <td><%= order.OrderDate %></td>
+          <td><%= order.OrderTotalAmount %></td>
+          <td><%= order.CartID %></td>
+          <td><%= order.PaymentCode %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Method</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Payment Method</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>PaymentCode</th>
+        <th>PaymentAmount</th>
+        <th>PaymentDate</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% paymentMethods.forEach(payment => { %>
+        <tr>
+          <td><%= payment.PaymentCode %></td>
+          <td><%= payment.PaymentAmount %></td>
+          <td><%= payment.PaymentDate %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chapter</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Chapter</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>ChapterName</th>
+        <th>CourseID</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% chapters.forEach(chapter => { %>
+        <tr>
+          <td><%= chapter.ChapterName %></td>
+          <td><%= chapter.CourseID %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

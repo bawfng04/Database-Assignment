@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Teacher</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>TeacherID</th>
+        <th>TeacherDescription</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% teacher.forEach(teacherUser => { %>
+        <tr>
+          <td><%= teacherUser.TeacherID %></td>
+          <td><%= teacherUser.TeacherDescription %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Document</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>DocumentID</th>
+        <th>CourseID</th>
+        <th>ChapterName</th>
+        <th>DocumentAuthor</th>
+        <th>DocumentTitle</th>
+        <th>DocumentSize</th>
+        <th>DocumentType</th>
+        <th>DocumentContent</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% documents.forEach(doc => { %>
+        <tr>
+          <td><%= doc.DocumentID %></td>
+          <td><%= doc.CourseID %></td>
+          <td><%= doc.ChapterName %></td>
+          <td><%= doc.DocumentAuthor %></td>
+          <td><%= doc.DocumentTitle %></td>
+          <td><%= doc.DocumentSize %></td>
+          <td><%= doc.DocumentType %></td>
+          <td><%= doc.DocumentContent %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

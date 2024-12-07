@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coupon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Coupon</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>CouponID</th>
+        <th>CouponTitle</th>
+        <th>CouponValue</th>
+        <th>CouponType</th>
+        <th>CouponStartDate</th>
+        <th>CouponEndDate</th>
+        <!-- Add more columns if needed -->
+      </tr>
+    </thead>
+    <tbody>
+      <% coupons.forEach(coupon => { %>
+        <tr>
+          <td><%= coupon.CouponID %></td>
+          <td><%= coupon.CouponTitle %></td>
+          <td><%= coupon.CouponValue %></td>
+          <td><%= coupon.CouponType %></td>
+          <td><%= coupon.CouponStartDate %></td>
+          <td><%= coupon.CouponEndDate %></td>
+          <!-- Add more columns if needed -->
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <button onclick="window.location.href='/'">Go Back</button>
+</body>
+</html>

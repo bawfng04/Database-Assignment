@@ -2,41 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Courses</title>
+  <title>Database Tables</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <h1>Courses</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>CourseID</th>
-        <th>CourseName</th>
-        <th>CourseStatus</th>
-        <th>CourseDescription</th>
-        <th>CoursePrice</th>
-        <th>CourseImage</th>
-        <th>CourseStartDate</th>
-        <th>CourseEndDate</th>
-        <th>CategoryID</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% courses.forEach(course => { %>
-        <tr>
-          <td><%= course.CourseID %></td>
-          <td><%= course.CourseName %></td>
-          <td><%= course.CourseStatus %></td>
-          <td><%= course.CourseDescription %></td>
-          <td><%= course.CoursePrice %></td>
-          <td><%= course.CourseImage %></td>
-          <td><%= course.CourseStartDate %></td>
-          <td><%= course.CourseEndDate %></td>
-          <td><%= course.CategoryID %></td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+  <h1>Database Tables</h1>
+  <ul>
+    <li><a href="/courses">Courses</a></li>
+    <li><a href="/users">Users</a></li>
+    <li><a href="/admin">Admin</a></li>
+    <li><a href="/teacher">Teacher</a></li>
+    <li><a href="/category">Category</a></li>
+    <li><a href="/cart">Cart</a></li>
+    <li><a href="/student">Student</a></li>
+    <li><a href="/coursestudent">Course Student</a></li>
+    <li><a href="/orders">Orders</a></li>
+    <li><a href="/paymentmethod">Payment Method</a></li>
+    <li><a href="/coupon">Coupon</a></li>
+    <li><a href="/chapter">Chapter</a></li>
+    <li><a href="/document">Document</a></li>
+    <li><a href="/lesson">Lesson</a></li>
+  </ul>
 </body>
 </html>
