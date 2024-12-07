@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Courses</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>CourseID</th>
+        <th>CourseName</th>
+        <th>CourseStatus</th>
+        <th>CourseDescription</th>
+        <th>CoursePrice</th>
+        <th>CourseImage</th>
+        <th>CourseStartDate</th>
+        <th>CourseEndDate</th>
+        <th>CategoryID</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% courses.forEach(course => { %>
+        <tr>
+          <td><%= course.CourseID %></td>
+          <td><%= course.CourseName %></td>
+          <td><%= course.CourseStatus %></td>
+          <td><%= course.CourseDescription %></td>
+          <td><%= course.CoursePrice %></td>
+          <td><%= course.CourseImage %></td>
+          <td><%= course.CourseStartDate %></td>
+          <td><%= course.CourseEndDate %></td>
+          <td><%= course.CategoryID %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>
