@@ -28,10 +28,10 @@ The project includes the following SQL scripts:
 - **[CreateTableBTL2HCSDL.sql](CreateTableBTL2HCSDL.sql)**: Contains the SQL commands to create the database tables with a different structure.
 
 ## How to Use
+
 1. Run the `BTL2v3.sql` script to create the database and tables.
-2. Populate the tables with initial data using the INSERT statements provided in the script.
-3. Go to /WebInterface/Backend and run "npm start" to start the server.
-4. Go to "http://localhost:3500" for tables visualize.
+2. Navigate to the `WebInterface/backend` directory and run `npm start` to start the server.
+3. Open [http://localhost:3500](http://localhost:3500) in your browser to visualize the tables.
 
 ## Database Schema Diagrams
 ![Schema](Schema.drawio.png)
