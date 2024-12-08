@@ -288,12 +288,13 @@ app.post("/coupon", async (req, res) => {
     CouponType,
     CouponStartDate,
     CouponExpire,
+    CouponMaxDiscount,
   } = req.body;
   try {
     const pool = await poolPromise;
     const query = `
-      INSERT INTO Coupon (CouponTitle, CouponValue, CouponType, CouponStartDate, CouponExpire)
-      VALUES (@CouponTitle, @CouponValue, @CouponType, @CouponStartDate, @CouponExpire)
+      INSERT INTO Coupon (CouponTitle, CouponValue, CouponType, CouponStartDate, CouponExpire, CouponMaxDiscount)
+      VALUES (@CouponTitle, @CouponValue, @CouponType, @CouponStartDate, @CouponExpire, @CouponMaxDiscount)
     `;
     await pool
       .request()
@@ -302,6 +303,7 @@ app.post("/coupon", async (req, res) => {
       .input("CouponType", sql.NVarChar, CouponType)
       .input("CouponStartDate", sql.Date, CouponStartDate)
       .input("CouponExpire", sql.Date, CouponExpire)
+      .input("CouponMaxDiscount", sql.Int, CouponMaxDiscount)
       .query(query);
     res.redirect("/coupon");
   } catch (err) {
@@ -333,12 +335,13 @@ app.post("/coupon/edit/:id", async (req, res) => {
     CouponType,
     CouponStartDate,
     CouponExpire,
+    CouponMaxDiscount,
   } = req.body;
   try {
     const pool = await poolPromise;
     const query = `
       UPDATE Coupon
-      SET CouponTitle = @CouponTitle, CouponValue = @CouponValue, CouponType = @CouponType,
+      SET CouponTitle = @CouponTitle, CouponValue = @CouponValue, CouponType = @CouponType, CouponMaxDiscount = @CouponMaxDiscount,
           CouponStartDate = @CouponStartDate, CouponExpire = @CouponExpire
       WHERE CouponID = @id
     `;
@@ -349,6 +352,7 @@ app.post("/coupon/edit/:id", async (req, res) => {
       .input("CouponType", sql.NVarChar, CouponType)
       .input("CouponStartDate", sql.Date, CouponStartDate)
       .input("CouponExpire", sql.Date, CouponExpire)
+      .input("CouponMaxDiscount", sql.Int, CouponMaxDiscount)
       .input("id", sql.Int, id)
       .query(query);
     res.redirect("/coupon");

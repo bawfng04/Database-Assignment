@@ -30,6 +30,7 @@
         <th>CouponType</th>
         <th>CouponStartDate</th>
         <th>CouponExpire</th>
+        <th>Max Discount</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -42,6 +43,7 @@
           <td><%= coupon.CouponType %></td>
           <td><%= coupon.CouponStartDate %></td>
           <td><%= coupon.CouponExpire %></td>
+          <td><%= coupon.CouponMaxDiscount %></td>
           <td>
             <button onclick="window.location.href='/coupon/edit/<%= coupon.CouponID %>'">Edit</button>
             <form method="POST" action="/coupon/delete/<%= coupon.CouponID %>" style="display:inline;">
