@@ -790,4 +790,3 @@ INSERT INTO Edit (EditTime, EditDescription, EditAdminID, EditCouponID, EditCour
 ('09:00:00', N'Tạo mới coupon giảm 15%', 1, 1, NULL),
 ('09:30:00', N'Điều chỉnh hạn sử dụng coupon 25%', 1, 2, NULL);
 
-
