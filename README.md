@@ -29,9 +29,11 @@ The project includes the following SQL scripts:
 
 ## How to Use
 
-1. Run the `BTL2v3.sql` script to create the database and tables.
-2. Navigate to the `WebInterface/backend` directory and run `npm start` to start the server.
-3. Open [http://localhost:3500](http://localhost:3500) in your browser to visualize the tables.
+1. Run the `BTL2v4.sql` script to create the database and tables.
+2. Run the `InsertData.sql` script to populate the database with initial data.
+3. Navigate to the `WebInterface/backend` directory and modify the `.env` file to include the correct database connection details.
+4. Run `npm start` to start the server.
+5. Open [http://localhost:3500](http://localhost:3500) in your browser to visualize the tables.
 
 ## Database Schema Diagrams
 ![Schema](Schema.drawio.png)
