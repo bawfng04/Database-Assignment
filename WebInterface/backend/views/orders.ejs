@@ -7,6 +7,18 @@
 </head>
 <body>
   <h1>Orders</h1>
+  <button onclick="window.location.href='/'">Go Back</button>
+  <form method="GET" action="/orders" id="sortForm">
+    <input type="text" name="search" placeholder="Search by Order ID" value="<%= search %>">
+    <select name="sort" onchange="document.getElementById('sortForm').submit()">
+      <option value="OrderID" <%= sort === 'OrderID' ? 'selected' : '' %>>Order ID</option>
+      <option value="OrderPaymentStatus" <%= sort === 'OrderPaymentStatus' ? 'selected' : '' %>>Order Payment Status</option>
+      <option value="OrderDate" <%= sort === 'OrderDate' ? 'selected' : '' %>>Order Date</option>
+      <option value="OrderTotalAmount" <%= sort === 'OrderTotalAmount' ? 'selected' : '' %>>Order Total Amount</option>
+      <!-- Add more sort options if needed -->
+    </select>
+    <button type="submit">Search</button>
+  </form>
   <table>
     <thead>
       <tr>
@@ -33,6 +45,5 @@
       <% }) %>
     </tbody>
   </table>
-  <button onclick="window.location.href='/'">Go Back</button>
 </body>
 </html>

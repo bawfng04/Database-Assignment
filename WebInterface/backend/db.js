@@ -3,7 +3,8 @@ const sql = require("mssql");
 // Connection configuration using environment variables
 const config = {
   server: "NPM-SASS",
-  database: "btl2connect",
+  // database: "btl2connect",
+  database: process.env.DB_NAME || "btl2connect",
   user: process.env.DB_USER || "bang",
   password: process.env.DB_PASSWORD || "123456",
   options: {

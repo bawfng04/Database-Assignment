@@ -7,6 +7,20 @@
 </head>
 <body>
   <h1>Coupon</h1>
+  <button onclick="window.location.href='/'">Go Back</button>
+  <form method="GET" action="/coupon" id="sortForm">
+    <input type="text" name="search" placeholder="Search by Coupon Title" value="<%= search %>">
+    <select name="sort" onchange="document.getElementById('sortForm').submit()">
+      <option value="CouponID" <%= sort === 'CouponID' ? 'selected' : '' %>>Coupon ID</option>
+      <option value="CouponTitle" <%= sort === 'CouponTitle' ? 'selected' : '' %>>Coupon Title</option>
+      <option value="CouponValue" <%= sort === 'CouponValue' ? 'selected' : '' %>>Coupon Value</option>
+      <option value="CouponType" <%= sort === 'CouponType' ? 'selected' : '' %>>Coupon Type</option>
+      <option value="CouponStartDate" <%= sort === 'CouponStartDate' ? 'selected' : '' %>>Coupon Start Date</option>
+      <option value="CouponEndDate" <%= sort === 'CouponEndDate' ? 'selected' : '' %>>Coupon End Date</option>
+      <!-- Add more sort options if needed -->
+    </select>
+    <button type="submit">Search</button>
+  </form>
   <table>
     <thead>
       <tr>
@@ -33,6 +47,5 @@
       <% }) %>
     </tbody>
   </table>
-  <button onclick="window.location.href='/'">Go Back</button>
 </body>
 </html>

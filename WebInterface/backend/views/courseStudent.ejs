@@ -7,6 +7,18 @@
 </head>
 <body>
   <h1>Course Student</h1>
+  <button onclick="window.location.href='/'">Go Back</button>
+  <form method="GET" action="/coursestudent" id="sortForm">
+    <input type="text" name="search" placeholder="Search by Course ID" value="<%= search %>">
+    <select name="sort" onchange="document.getElementById('sortForm').submit()">
+      <option value="CourseID" <%= sort === 'CourseID' ? 'selected' : '' %>>Course ID</option>
+      <option value="StudentID" <%= sort === 'StudentID' ? 'selected' : '' %>>Student ID</option>
+      <option value="CourseProgress" <%= sort === 'CourseProgress' ? 'selected' : '' %>>Course Progress</option>
+      <option value="ReviewScore" <%= sort === 'ReviewScore' ? 'selected' : '' %>>Review Score</option>
+      <!-- Add more sort options if needed -->
+    </select>
+    <button type="submit">Search</button>
+  </form>
   <table>
     <thead>
       <tr>
@@ -31,6 +43,5 @@
       <% }) %>
     </tbody>
   </table>
-  <button onclick="window.location.href='/'">Go Back</button>
 </body>
 </html>

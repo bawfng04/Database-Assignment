@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { poolPromise, sql } = require("./db");
+require("dotenv").config();
 
 const app = express();
 
@@ -12,15 +13,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Main route: Display list of tables
 app.get("/", (req, res) => {
-  res.render("index");
+  const dbName = process.env.DB_NAME || "NULL";
+  res.render("index", { dbName });
 });
 
 // Route for Courses table
 app.get("/courses", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "CourseID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Course");
-    res.render("courses", { courses: result.recordset });
+    const query = `
+      SELECT * FROM Course
+      WHERE CourseName LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("courses", { courses: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -29,10 +41,20 @@ app.get("/courses", async (req, res) => {
 
 // Route for Users table
 app.get("/users", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "UsernameID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Users");
-    res.render("users", { users: result.recordset });
+    const query = `
+      SELECT * FROM Users
+      WHERE Username LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("users", { users: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -41,10 +63,20 @@ app.get("/users", async (req, res) => {
 
 // Route for Admin table
 app.get("/admin", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "AdminID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Admin");
-    res.render("admin", { admin: result.recordset });
+    const query = `
+      SELECT * FROM Admin
+      WHERE AdminID LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("admin", { admin: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -53,10 +85,20 @@ app.get("/admin", async (req, res) => {
 
 // Route for Teacher table
 app.get("/teacher", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "TeacherID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Teacher");
-    res.render("teacher", { teacher: result.recordset });
+    const query = `
+      SELECT * FROM Teacher
+      WHERE TeacherID LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("teacher", { teacher: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -65,10 +107,20 @@ app.get("/teacher", async (req, res) => {
 
 // Route for Category table
 app.get("/category", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "CategoryID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Category");
-    res.render("category", { category: result.recordset });
+    const query = `
+      SELECT * FROM Category
+      WHERE CategoryName LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("category", { category: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -77,10 +129,20 @@ app.get("/category", async (req, res) => {
 
 // Route for Cart table
 app.get("/cart", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "CartID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Cart");
-    res.render("cart", { cart: result.recordset });
+    const query = `
+      SELECT * FROM Cart
+      WHERE CartID LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("cart", { cart: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -89,10 +151,20 @@ app.get("/cart", async (req, res) => {
 
 // Route for Student table
 app.get("/student", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "StudentID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Student");
-    res.render("student", { student: result.recordset });
+    const query = `
+      SELECT * FROM Student
+      WHERE StudentID LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("student", { student: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -101,10 +173,24 @@ app.get("/student", async (req, res) => {
 
 // Route for CourseStudent table
 app.get("/coursestudent", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "CourseID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM CourseStudent");
-    res.render("courseStudent", { courseStudent: result.recordset });
+    const query = `
+      SELECT * FROM CourseStudent
+      WHERE CourseID LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("courseStudent", {
+      courseStudent: result.recordset,
+      search,
+      sort,
+    });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -113,10 +199,20 @@ app.get("/coursestudent", async (req, res) => {
 
 // Route for Orders table
 app.get("/orders", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "OrderID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Orders");
-    res.render("orders", { orders: result.recordset });
+    const query = `
+      SELECT * FROM Orders
+      WHERE OrderID LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("orders", { orders: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -125,10 +221,24 @@ app.get("/orders", async (req, res) => {
 
 // Route for PaymentMethod table
 app.get("/paymentmethod", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "PaymentCode";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM PaymentMethod");
-    res.render("paymentMethod", { paymentMethods: result.recordset });
+    const query = `
+      SELECT * FROM PaymentMethod
+      WHERE PaymentCode LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("paymentMethod", {
+      paymentMethods: result.recordset,
+      search,
+      sort,
+    });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -137,10 +247,20 @@ app.get("/paymentmethod", async (req, res) => {
 
 // Route for Coupon table
 app.get("/coupon", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "CouponID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Coupon");
-    res.render("coupon", { coupons: result.recordset });
+    const query = `
+      SELECT * FROM Coupon
+      WHERE CouponTitle LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("coupon", { coupons: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -149,10 +269,20 @@ app.get("/coupon", async (req, res) => {
 
 // Route for Chapter table
 app.get("/chapter", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "ChapterName";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Chapter");
-    res.render("chapter", { chapters: result.recordset });
+    const query = `
+      SELECT * FROM Chapter
+      WHERE ChapterName LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("chapter", { chapters: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -161,10 +291,20 @@ app.get("/chapter", async (req, res) => {
 
 // Route for Document table
 app.get("/document", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "DocumentID";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Document");
-    res.render("document", { documents: result.recordset });
+    const query = `
+      SELECT * FROM Document
+      WHERE DocumentTitle LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("document", { documents: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -173,10 +313,20 @@ app.get("/document", async (req, res) => {
 
 // Route for Lesson table
 app.get("/lesson", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "LessonOrder";
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Lesson");
-    res.render("lesson", { lessons: result.recordset });
+    const query = `
+      SELECT * FROM Lesson
+      WHERE LessonTitle LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("lesson", { lessons: result.recordset, search, sort });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");

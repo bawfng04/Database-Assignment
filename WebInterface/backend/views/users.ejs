@@ -7,6 +7,17 @@
 </head>
 <body>
   <h1>Users</h1>
+  <button onclick="window.location.href='/'">Go Back</button>
+  <form method="GET" action="/users" id="sortForm">
+    <input type="text" name="search" placeholder="Search by Username" value="<%= search %>">
+    <select name="sort" onchange="document.getElementById('sortForm').submit()">
+      <option value="UsernameID" <%= sort === 'UsernameID' ? 'selected' : '' %>>Username ID</option>
+      <option value="UserEmail" <%= sort === 'UserEmail' ? 'selected' : '' %>>User Email</option>
+      <option value="UserPhone" <%= sort === 'UserPhone' ? 'selected' : '' %>>User Phone</option>
+      <option value="Username" <%= sort === 'Username' ? 'selected' : '' %>>Username</option>
+    </select>
+    <button type="submit">Search</button>
+  </form>
   <table>
     <thead>
       <tr>
@@ -33,6 +44,6 @@
       <% }) %>
     </tbody>
   </table>
-  <button onclick="window.location.href='/'">Go Back</button>
+
 </body>
 </html>
