@@ -24,8 +24,9 @@ The database schema is designed to support the various functionalities of an onl
 ## Scripts
 The project includes the following SQL scripts:
 
-- **[BTL2v2.sql](BTL2v2.sql)**: Contains the SQL commands to create and populate the database tables.
-- **[CreateTableBTL2HCSDL.sql](CreateTableBTL2HCSDL.sql)**: Contains the SQL commands to create the database tables with a different structure.
+- **[BTL2v4.sql](SQL/BTL2v4.sql)**: Contains the SQL commands to create the database and tables.
+- **[InsertData.sql](SQL/InsertData.sql)**: Contains the SQL commands to populate the database with initial data.
+- **[WebInterface/backend](WebInterface/backend)**: Contains the backend server code to interact with the database.
 
 ## How to Use
 
