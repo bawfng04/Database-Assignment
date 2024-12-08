@@ -127,27 +127,27 @@ app.get("/category", async (req, res) => {
   }
 });
 
-// Route for Cart table
-app.get("/cart", async (req, res) => {
-  const search = req.query.search || "";
-  const sort = req.query.sort || "CartID";
-  try {
-    const pool = await poolPromise;
-    const query = `
-      SELECT * FROM Cart
-      WHERE CartID LIKE @search
-      ORDER BY ${sort}
-    `;
-    const result = await pool
-      .request()
-      .input("search", sql.NVarChar, `%${search}%`)
-      .query(query);
-    res.render("cart", { cart: result.recordset, search, sort });
-  } catch (err) {
-    console.error("Error fetching data:", err);
-    res.status(500).send("Error fetching data from database.");
-  }
-});
+// // Route for Cart table
+// app.get("/cart", async (req, res) => {
+//   const search = req.query.search || "";
+//   const sort = req.query.sort || "CartID";
+//   try {
+//     const pool = await poolPromise;
+//     const query = `
+//       SELECT * FROM Cart
+//       WHERE CartID LIKE @search
+//       ORDER BY ${sort}
+//     `;
+//     const result = await pool
+//       .request()
+//       .input("search", sql.NVarChar, `%${search}%`)
+//       .query(query);
+//     res.render("cart", { cart: result.recordset, search, sort });
+//   } catch (err) {
+//     console.error("Error fetching data:", err);
+//     res.status(500).send("Error fetching data from database.");
+//   }
+// });
 
 // Route for Student table
 app.get("/student", async (req, res) => {
@@ -245,6 +245,9 @@ app.get("/paymentmethod", async (req, res) => {
   }
 });
 
+
+
+//=======================================================================================================
 // Route for Coupon table
 app.get("/coupon", async (req, res) => {
   const search = req.query.search || "";
@@ -266,6 +269,117 @@ app.get("/coupon", async (req, res) => {
     res.status(500).send("Error fetching data from database.");
   }
 });
+
+
+
+
+// CREATE NEW COUPON
+// Route to render the form for creating a new coupon
+app.get("/coupon/new", (req, res) => {
+  res.render("newCoupon");
+});
+
+// Route to handle the creation of a new coupon
+// Route to handle the creation of a new coupon
+app.post("/coupon", async (req, res) => {
+  const {
+    CouponTitle,
+    CouponValue,
+    CouponType,
+    CouponStartDate,
+    CouponExpire,
+  } = req.body;
+  try {
+    const pool = await poolPromise;
+    const query = `
+      INSERT INTO Coupon (CouponTitle, CouponValue, CouponType, CouponStartDate, CouponExpire)
+      VALUES (@CouponTitle, @CouponValue, @CouponType, @CouponStartDate, @CouponExpire)
+    `;
+    await pool
+      .request()
+      .input("CouponTitle", sql.NVarChar, CouponTitle)
+      .input("CouponValue", sql.Int, CouponValue)
+      .input("CouponType", sql.NVarChar, CouponType)
+      .input("CouponStartDate", sql.Date, CouponStartDate)
+      .input("CouponExpire", sql.Date, CouponExpire)
+      .query(query);
+    res.redirect("/coupon");
+  } catch (err) {
+    console.error("Error creating coupon:", err);
+    res.status(500).send("Error creating coupon.");
+  }
+});
+
+// Route to render the form for updating a coupon
+app.get("/coupon/edit/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    const query = `SELECT * FROM Coupon WHERE CouponID = @id`;
+    const result = await pool.request().input("id", sql.Int, id).query(query);
+    res.render("editCoupon", { coupon: result.recordset[0] });
+  } catch (err) {
+    console.error("Error fetching coupon:", err);
+    res.status(500).send("Error fetching coupon.");
+  }
+});
+
+// Route to handle the update of a coupon
+app.post("/coupon/edit/:id", async (req, res) => {
+  const { id } = req.params;
+  const {
+    CouponTitle,
+    CouponValue,
+    CouponType,
+    CouponStartDate,
+    CouponExpire,
+  } = req.body;
+  try {
+    const pool = await poolPromise;
+    const query = `
+      UPDATE Coupon
+      SET CouponTitle = @CouponTitle, CouponValue = @CouponValue, CouponType = @CouponType,
+          CouponStartDate = @CouponStartDate, CouponExpire = @CouponExpire
+      WHERE CouponID = @id
+    `;
+    await pool
+      .request()
+      .input("CouponTitle", sql.NVarChar, CouponTitle)
+      .input("CouponValue", sql.Int, CouponValue)
+      .input("CouponType", sql.NVarChar, CouponType)
+      .input("CouponStartDate", sql.Date, CouponStartDate)
+      .input("CouponExpire", sql.Date, CouponExpire)
+      .input("id", sql.Int, id)
+      .query(query);
+    res.redirect("/coupon");
+  } catch (err) {
+    console.error("Error updating coupon:", err);
+    res.status(500).send("Error updating coupon.");
+  }
+});
+
+// Route to handle the deletion of a coupon
+app.post("/coupon/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    const query = `DELETE FROM Coupon WHERE CouponID = @id`;
+    await pool.request().input("id", sql.Int, id).query(query);
+    res.redirect("/coupon");
+  } catch (err) {
+    console.error("Error deleting coupon:", err);
+    res.status(500).send("Error deleting coupon.");
+  }
+});
+
+
+
+
+
+
+// ========================================
+
+
 
 // Route for Chapter table
 app.get("/chapter", async (req, res) => {

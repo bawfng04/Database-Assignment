@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>New Coupon</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Create New Coupon</h1>
+  <form method="POST" action="/coupon">
+    <label for="CouponTitle">Title:</label>
+    <input type="text" id="CouponTitle" name="CouponTitle" required>
+    <label for="CouponValue">Value:</label>
+    <input type="number" id="CouponValue" name="CouponValue" required>
+    <label for="CouponType">Type:</label>
+    <select id="CouponType" name="CouponType" required>
+      <option value="Phần trăm">Phần trăm</option>
+      <option value="Giá trị">Giá trị</option>
+    </select>
+    <label for="CouponStartDate">Start Date:</label>
+    <input type="date" id="CouponStartDate" name="CouponStartDate" required>
+    <label for="CouponExpire">End Date:</label>
+    <input type="date" id="CouponExpire" name="CouponExpire" required>
+    <button type="submit">Create</button>
+  </form>
+  <button onclick="window.location.href='/coupon'">Go Back</button>
+</body>
+</html>

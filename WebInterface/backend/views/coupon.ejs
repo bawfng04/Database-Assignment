@@ -8,6 +8,7 @@
 <body>
   <h1>Coupon</h1>
   <button onclick="window.location.href='/'">Go Back</button>
+  <button onclick="window.location.href='/coupon/new'">Create New Coupon</button>
   <form method="GET" action="/coupon" id="sortForm">
     <input type="text" name="search" placeholder="Search by Coupon Title" value="<%= search %>">
     <select name="sort" onchange="document.getElementById('sortForm').submit()">
@@ -16,8 +17,7 @@
       <option value="CouponValue" <%= sort === 'CouponValue' ? 'selected' : '' %>>Coupon Value</option>
       <option value="CouponType" <%= sort === 'CouponType' ? 'selected' : '' %>>Coupon Type</option>
       <option value="CouponStartDate" <%= sort === 'CouponStartDate' ? 'selected' : '' %>>Coupon Start Date</option>
-      <option value="CouponEndDate" <%= sort === 'CouponEndDate' ? 'selected' : '' %>>Coupon End Date</option>
-      <!-- Add more sort options if needed -->
+      <option value="CouponExpire" <%= sort === 'CouponExpire' ? 'selected' : '' %>>Coupon End Date</option>
     </select>
     <button type="submit">Search</button>
   </form>
@@ -29,8 +29,8 @@
         <th>CouponValue</th>
         <th>CouponType</th>
         <th>CouponStartDate</th>
-        <th>CouponEndDate</th>
-        <!-- Add more columns if needed -->
+        <th>CouponExpire</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -41,8 +41,13 @@
           <td><%= coupon.CouponValue %></td>
           <td><%= coupon.CouponType %></td>
           <td><%= coupon.CouponStartDate %></td>
-          <td><%= coupon.CouponEndDate %></td>
-          <!-- Add more columns if needed -->
+          <td><%= coupon.CouponExpire %></td>
+          <td>
+            <button onclick="window.location.href='/coupon/edit/<%= coupon.CouponID %>'">Edit</button>
+            <form method="POST" action="/coupon/delete/<%= coupon.CouponID %>" style="display:inline;">
+              <button type="submit">Delete</button>
+            </form>
+          </td>
         </tr>
       <% }) %>
     </tbody>
