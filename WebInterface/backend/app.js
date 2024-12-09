@@ -324,6 +324,7 @@ app.post("/coupon/edit/:id", async (req, res) => {
     CouponMaxDiscount,
   } = req.body;
   try {
+    // alert("hello");
     const pool = await poolPromise;
     await pool
       .request()
@@ -336,9 +337,16 @@ app.post("/coupon/edit/:id", async (req, res) => {
       .input("CouponMaxDiscount", sql.Int, CouponMaxDiscount)
       .execute("UpdateCoupon"); // Call the stored procedure
 
+
+
+
+
+    //print the message
+
     res.redirect("/coupon");
   } catch (err) {
-    console.error("Error updating coupon:", err);
+    // console.error("Error updating coupon:", err);
+    console.log(err);
     res.status(500).send("Error updating coupon.");
   }
 });
