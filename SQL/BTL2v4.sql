@@ -303,7 +303,98 @@ CREATE TABLE Review(
 
 ------------ INSERT/UPDATE/DELETE - PROCEDURE/FUNCTION/TRIGGER ----------------
 
+-- Create stored procedure to insert data into Coupon table
+GO
+CREATE PROCEDURE InsertCoupon
+    @CouponTitle NVARCHAR(255),
+    @CouponValue INT,
+    @CouponType NVARCHAR(255),
+    @CouponStartDate DATE,
+    @CouponExpire DATE,
+    @CouponMaxDiscount INT
+AS
+BEGIN
+    -- Validate data
+    IF @CouponValue <= 0
+    BEGIN
+        PRINT 'Error: Coupon value must be greater than 0.'
+        RETURN
+    END
 
+    IF @CouponStartDate >= @CouponExpire
+    BEGIN
+        PRINT 'Error: Coupon start date must be earlier than the expire date.'
+        RETURN
+    END
+
+    -- Insert data
+    INSERT INTO Coupon (CouponTitle, CouponValue, CouponType, CouponStartDate, CouponExpire, CouponMaxDiscount)
+    VALUES (@CouponTitle, @CouponValue, @CouponType, @CouponStartDate, @CouponExpire, @CouponMaxDiscount)
+END
+GO
+
+-- Create stored procedure to update data in Coupon table
+CREATE PROCEDURE UpdateCoupon
+    @CouponID INT,
+    @CouponTitle NVARCHAR(255),
+    @CouponValue INT,
+    @CouponType NVARCHAR(255),
+    @CouponStartDate DATE,
+    @CouponExpire DATE,
+    @CouponMaxDiscount INT
+AS
+BEGIN
+    -- Validate data
+    IF @CouponValue <= 0
+    BEGIN
+        PRINT 'Error: Coupon value must be greater than 0.'
+        RETURN
+    END
+
+    IF @CouponStartDate >= @CouponExpire
+    BEGIN
+        PRINT 'Error: Coupon start date must be earlier than the expire date.'
+        RETURN
+    END
+
+    -- Update data
+    UPDATE Coupon
+    SET CouponTitle = @CouponTitle,
+        CouponValue = @CouponValue,
+        CouponType = @CouponType,
+        CouponStartDate = @CouponStartDate,
+        CouponExpire = @CouponExpire,
+        CouponMaxDiscount = @CouponMaxDiscount
+    WHERE CouponID = @CouponID
+END
+GO
+
+-- Create stored procedure to delete data from Coupon table
+CREATE PROCEDURE DeleteCoupon
+    @CouponID INT
+AS
+BEGIN
+    -- Validate data
+    IF NOT EXISTS (SELECT 1 FROM Coupon WHERE CouponID = @CouponID)
+    BEGIN
+        PRINT 'Error: Coupon ID does not exist.'
+        RETURN
+    END
+
+    -- Delete data
+    DELETE FROM Coupon WHERE CouponID = @CouponID
+END
+GO
+
+-- Test the stored procedures
+-- Insert test
+EXEC InsertCoupon 'New Year Discount', 20, 'Phần trăm', '2024-01-01', '2024-12-31', 100
+
+-- Update test
+EXEC UpdateCoupon 1, 'Updated Discount', 25, 'Giá trị', '2024-01-01', '2024-12-31', 150
+
+-- Delete test
+EXEC DeleteCoupon 1
 
 
 

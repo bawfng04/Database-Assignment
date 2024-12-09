@@ -5,19 +5,16 @@ require("dotenv").config();
 
 const app = express();
 
-// Configure EJS as the view engine
 app.set("view engine", "ejs");
 app.set("views", "./views");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Main route: Display list of tables
 app.get("/", (req, res) => {
   const dbName = process.env.DB_NAME || "NULL";
   res.render("index", { dbName });
 });
 
-// Route for Courses table
 app.get("/courses", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "CourseID";
@@ -39,7 +36,6 @@ app.get("/courses", async (req, res) => {
   }
 });
 
-// Route for Users table
 app.get("/users", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "UsernameID";
@@ -61,7 +57,6 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// Route for Admin table
 app.get("/admin", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "AdminID";
@@ -83,7 +78,6 @@ app.get("/admin", async (req, res) => {
   }
 });
 
-// Route for Teacher table
 app.get("/teacher", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "TeacherID";
@@ -105,7 +99,6 @@ app.get("/teacher", async (req, res) => {
   }
 });
 
-// Route for Category table
 app.get("/category", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "CategoryID";
@@ -127,7 +120,6 @@ app.get("/category", async (req, res) => {
   }
 });
 
-// // Route for Cart table
 // app.get("/cart", async (req, res) => {
 //   const search = req.query.search || "";
 //   const sort = req.query.sort || "CartID";
@@ -149,7 +141,6 @@ app.get("/category", async (req, res) => {
 //   }
 // });
 
-// Route for Student table
 app.get("/student", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "StudentID";
@@ -171,7 +162,6 @@ app.get("/student", async (req, res) => {
   }
 });
 
-// Route for CourseStudent table
 app.get("/coursestudent", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "CourseID";
@@ -197,7 +187,6 @@ app.get("/coursestudent", async (req, res) => {
   }
 });
 
-// Route for Orders table
 app.get("/orders", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "OrderID";
@@ -219,7 +208,6 @@ app.get("/orders", async (req, res) => {
   }
 });
 
-// Route for PaymentMethod table
 app.get("/paymentmethod", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "PaymentCode";
@@ -245,10 +233,7 @@ app.get("/paymentmethod", async (req, res) => {
   }
 });
 
-
-
 //=======================================================================================================
-// Route for Coupon table
 app.get("/coupon", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "CouponID";
@@ -270,17 +255,10 @@ app.get("/coupon", async (req, res) => {
   }
 });
 
-
-
-
-// CREATE NEW COUPON
-// Route to render the form for creating a new coupon
 app.get("/coupon/new", (req, res) => {
   res.render("newCoupon");
 });
 
-// Route to handle the creation of a new coupon
-// Route to handle the creation of a new coupon
 app.post("/coupon", async (req, res) => {
   const {
     CouponTitle,
@@ -312,7 +290,6 @@ app.post("/coupon", async (req, res) => {
   }
 });
 
-// Route to render the form for updating a coupon
 app.get("/coupon/edit/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -326,7 +303,6 @@ app.get("/coupon/edit/:id", async (req, res) => {
   }
 });
 
-// Route to handle the update of a coupon
 app.post("/coupon/edit/:id", async (req, res) => {
   const { id } = req.params;
   const {
@@ -362,7 +338,6 @@ app.post("/coupon/edit/:id", async (req, res) => {
   }
 });
 
-// Route to handle the deletion of a coupon
 app.post("/coupon/delete/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -376,16 +351,7 @@ app.post("/coupon/delete/:id", async (req, res) => {
   }
 });
 
-
-
-
-
-
 // ========================================
-
-
-
-// Route for Chapter table
 app.get("/chapter", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "ChapterName";
@@ -407,7 +373,6 @@ app.get("/chapter", async (req, res) => {
   }
 });
 
-// Route for Document table
 app.get("/document", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "DocumentID";
@@ -429,7 +394,6 @@ app.get("/document", async (req, res) => {
   }
 });
 
-// Route for Lesson table
 app.get("/lesson", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "LessonOrder";
@@ -451,7 +415,6 @@ app.get("/lesson", async (req, res) => {
   }
 });
 
-// Start the server
 const PORT = 3500;
 app.listen(PORT, () =>
   console.log(`Server is running at http://localhost:${PORT}`)

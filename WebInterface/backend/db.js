@@ -1,10 +1,8 @@
 const sql = require("mssql");
 require("dotenv").config();
 
-// Connection configuration using environment variables
 const config = {
   server: "NPM-SASS",
-  // database: "btl2connect",
   database: process.env.DB_NAME || "",
   user: process.env.DB_USER || "bang",
   password: process.env.DB_PASSWORD || "123456",
@@ -14,7 +12,6 @@ const config = {
   },
 };
 
-// Function to connect to SQL Server
 const poolPromise = new sql.ConnectionPool(config)
   .connect()
   .then((pool) => {
