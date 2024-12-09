@@ -1100,9 +1100,8 @@ INSERT INTO Edit (EditTime, EditDescription, EditAdminID, EditCouponID, EditCour
 
 
 
-
-
--- Thủ tục thêm mới phiếu giảm giá
+---------------------------------------------------------------------2.1---------------------------------------------------------------------
+-- INSERT COUPON
 GO
 CREATE PROCEDURE InsertCoupon
     @CouponTitle NVARCHAR(255),
@@ -1240,13 +1239,7 @@ BEGIN
 END
 GO
 
-
-
-
-
-
-
-
+--UPDATE COUPON
 CREATE PROCEDURE UpdateCoupon
     @CouponID VARCHAR(20),
     @CouponTitle NVARCHAR(255),
@@ -1349,7 +1342,7 @@ GO
 
 
 
-
+--DELETE COUPON
 CREATE PROCEDURE DeleteCoupon
     @CouponID VARCHAR(20)
 AS
@@ -1388,3 +1381,149 @@ BEGIN
     END CATCH
 END
 GO
+
+
+
+
+
+---------------------------------------------------------------------2.4---------------------------------------------------------------------
+GO
+CREATE FUNCTION CalculateTotalRevenue
+(
+    @CourseID INT
+)
+RETURNS INT
+AS
+BEGIN
+    -- Declare variables
+    DECLARE @TotalRevenue INT = 0;
+    DECLARE @OrderID INT;
+    DECLARE @CoursePrice INT;
+
+    -- Check if the CourseID exists in the Course table
+    IF NOT EXISTS (SELECT 1 FROM Course WHERE CourseID = @CourseID)
+    BEGIN
+        RETURN -1; -- Indicate invalid input without using RAISERROR
+    END
+
+    -- Declare a pointer to iterate through all orders related to the course
+    DECLARE OrderCursor CURSOR FOR
+    SELECT OrderID FROM CourseOrder WHERE CourseID = @CourseID;
+
+    -- Open the cursor
+    OPEN OrderCursor;
+    FETCH NEXT FROM OrderCursor INTO @OrderID;
+
+    -- Loop through orders
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Get the price of the course
+        SELECT @CoursePrice = CoursePrice FROM Course WHERE CourseID = @CourseID;
+        -- Add the price to the total revenue
+        SET @TotalRevenue = @TotalRevenue + @CoursePrice;
+
+        -- Move to the next order
+        FETCH NEXT FROM OrderCursor INTO @OrderID;
+    END
+
+    -- Close and deallocate the cursor
+    CLOSE OrderCursor;
+    DEALLOCATE OrderCursor;
+
+    -- Return the total revenue
+    RETURN @TotalRevenue;
+END;
+GO
+
+DECLARE @Revenue INT;
+SET @Revenue = dbo.CalculateTotalRevenue(1); -- Calculate revenue for CourseID = 1
+PRINT 'Total Revenue: ' + CAST(@Revenue AS NVARCHAR);
+
+
+
+
+------
+GO
+CREATE FUNCTION CalculateAverageTestScore
+(
+    @StudentID INT
+)
+RETURNS FLOAT
+AS
+BEGIN
+    -- Declare variables
+    DECLARE @TotalScore FLOAT = 0;
+    DECLARE @TestCount INT = 0;
+    DECLARE @AverageScore FLOAT = 0;
+    DECLARE @TestScore FLOAT;
+    DECLARE @CourseID INT;
+    DECLARE @TestOrder INT;
+    DECLARE @ChapterName NVARCHAR(255);
+
+    -- Check if the StudentID exists in the Student table
+    IF NOT EXISTS (SELECT 1 FROM Student WHERE StudentID = @StudentID)
+    BEGIN
+        RAISERROR('Invalid StudentID. Student does not exist.', 16, 1);
+        RETURN -1; -- Indicate invalid input
+    END
+
+    -- Declare a pointer to iterate through all tests related to the student
+    DECLARE TestCursor CURSOR FOR
+    SELECT CourseID, TestOrder, ChapterName, TestScore
+    FROM Student_Test
+    WHERE StudentID = @StudentID;
+
+    -- Open the cursor
+    OPEN TestCursor;
+    FETCH NEXT FROM TestCursor INTO @CourseID, @TestOrder, @ChapterName, @TestScore;
+
+    -- Loop through test scores
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Add the test score to the total
+        SET @TotalScore = @TotalScore + @TestScore;
+        -- Increment the test count
+        SET @TestCount = @TestCount + 1;
+
+        -- Move to the next test
+        FETCH NEXT FROM TestCursor INTO @CourseID, @TestOrder, @ChapterName, @TestScore;
+    END
+
+    -- Close and deallocate the cursor
+    CLOSE TestCursor;
+    DEALLOCATE TestCursor;
+
+    -- Calculate the average if there are tests
+    IF @TestCount > 0
+    BEGIN
+        SET @AverageScore = @TotalScore / @TestCount;
+    END
+    ELSE
+    BEGIN
+        RETURN 0; -- No tests found, return 0
+    END
+
+    -- Return the average score
+    RETURN @AverageScore;
+END;
+GO
+
+DECLARE @AvgScore FLOAT;
+SET @AvgScore = dbo.CalculateAverageTestScore(7); -- Calculate average score for StudentID = 7
+PRINT 'Average Test Score: ' + CAST(@AvgScore AS NVARCHAR);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
