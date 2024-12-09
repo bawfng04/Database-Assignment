@@ -1,5 +1,5 @@
 
----------------------- TẠO DATABASE --------------------------------
+----------------------------- TẠO DATABASE --------------------------------
 
 --Người dùng hệ thống
 CREATE TABLE Users(
@@ -33,8 +33,6 @@ CREATE TABLE Category(
     CategoryDescription NVARCHAR(255),
 );
 
-
-
 --Bảng khoá học
 CREATE TABLE Course(
     CourseID INT IDENTITY (1,1) PRIMARY KEY,
@@ -50,7 +48,6 @@ CREATE TABLE Course(
 
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
 );
-
 
 --Chương
 CREATE TABLE Chapter(
@@ -214,8 +211,6 @@ CREATE TABLE Edit (
     FOREIGN KEY (EditCouponID) REFERENCES Coupon(CouponID),
 );
 
-
-
 --Khoá học có học viên
 CREATE TABLE CourseStudent(
     CourseID INT,
@@ -225,9 +220,6 @@ CREATE TABLE CourseStudent(
     FOREIGN KEY (CourseID) REFERENCES Course(CourseID),
     FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
 )
-
-
-
 
 --Phương thức thanh toán
 CREATE TABLE PaymentMethod(
@@ -260,7 +252,6 @@ CREATE TABLE VISA(
 
     FOREIGN KEY (PaymentCode) REFERENCES PaymentMethod(PaymentCode),
 )
-
 
 --Đơn hàng
 CREATE TABLE Orders(
@@ -301,20 +292,7 @@ CREATE TABLE Review(
 
 
 
------------- INSERT/UPDATE/DELETE - PROCEDURE/FUNCTION/TRIGGER ----------------
-
-
-
-
-
-
-
-
-
-
-
-
---------------- TRIGGER để check trước khi insert dữ liệu
+--------------- TRIGGER để check trước khi insert dữ liệu ----------------
 -- Trigger khi insert dữ liệu vào bảng Users
 GO
 CREATE TRIGGER trg_Users_Insert
@@ -489,9 +467,6 @@ BEGIN
     SELECT CategoryName, CategoryDescription
     FROM inserted;
 END;
-
-
-
 
 -- Trigger khi insert dữ liệu vào bảng Course
 GO
@@ -1295,10 +1270,6 @@ VALUES
 (11, 4, 2, N'Chương 4: Deep Learning', 8);
 
 
-
-
-
-
 INSERT INTO Lesson (LessonOrder, CourseID, ChapterName, LessonTitle, LessonContent, LessonDuraion) VALUES
 -- Lessons của Chapter 1 React
 (1, 1, N'Chương 1: Giới thiệu về ReactJS', N'Bài 1: Tổng quan về ReactJS', N'Giới thiệu về ReactJS và ứng dụng', '01:30:00'),
@@ -1375,11 +1346,6 @@ INSERT INTO Edit (EditTime, EditDescription, EditAdminID, EditCouponID, EditCour
 -- Chỉnh sửa coupon
 ('09:00:00', N'Tạo mới coupon giảm 15%', 1, 1, NULL),
 ('09:30:00', N'Điều chỉnh hạn sử dụng coupon 25%', 1, 2, NULL);
-
-
-
-
-
 
 
 ---------------------------------------------------------------------2.1---------------------------------------------------------------------
@@ -1559,6 +1525,7 @@ BEGIN
         END
 
 
+
         --Validate coupon type
         IF @CouponType NOT IN ('percent', 'fixed')
         BEGIN
@@ -1577,6 +1544,13 @@ BEGIN
         IF @CouponType = 'fixed' AND @CouponValue <= 0
         BEGIN
             RAISERROR('Giá trị giảm giá phải lớn hơn 0', 16, 1)
+            RETURN
+        END
+
+        --Validate max discount
+        IF @CouponType = 'fixed' AND @CouponMaxDiscount > @CouponValue
+        BEGIN
+            RAISERROR('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá', 16, 1)
             RETURN
         END
 
@@ -1664,7 +1638,19 @@ BEGIN
 END
 GO
 
+-- Ví dụ sử dụng các stored procedure
 
+-- Thêm mã giảm giá
+DECLARE @ErrorMessage NVARCHAR(255);
+EXEC InsertCoupon 'SUMMER2021', 20, 'percent', '2025-06-01', '2026-08-31', 100, @ErrorMessage OUTPUT;
+
+-- Cập nhật mã giảm giá
+DECLARE @ErrorMessage NVARCHAR(255);
+EXEC UpdateCoupon '1', 'SUMMER2022', 25, 'percent', '2025-06-01', '2026-08-31', 100, @ErrorMessage OUTPUT;
+
+
+-- Xóa mã giảm giá
+EXEC DeleteCoupon '1';
 
 
 
