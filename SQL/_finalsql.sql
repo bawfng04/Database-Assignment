@@ -931,86 +931,86 @@ VALUES
 -- Student 7 - Course 2 (Android)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(7, 2, 1, N'Chương 1: Cơ bản về Android', 0),
-(7, 2, 2, N'Chương 1: Cơ bản về Android', 0),
-(7, 2, 1, N'Chương 2: Layout và UI', 0),
-(7, 2, 2, N'Chương 2: Layout và UI', 0),
-(7, 2, 1, N'Chương 3: Activities và Intents', 0),
-(7, 2, 2, N'Chương 3: Activities và Intents', 0),
-(7, 2, 1, N'Chương 4: Data Storage', 0),
-(7, 2, 2, N'Chương 4: Data Storage', 0);
+(7, 2, 1, N'Chương 1: Cơ bản về Android', 8),
+(7, 2, 2, N'Chương 1: Cơ bản về Android', 9),
+(7, 2, 1, N'Chương 2: Layout và UI', 7),
+(7, 2, 2, N'Chương 2: Layout và UI', 8),
+(7, 2, 1, N'Chương 3: Activities và Intents', 8),
+(7, 2, 2, N'Chương 3: Activities và Intents', 6),
+(7, 2, 1, N'Chương 4: Data Storage', 9),
+(7, 2, 2, N'Chương 4: Data Storage', 10);
 
 -- Student 8 - Course 1 (React)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(8, 1, 1, N'Chương 1: Giới thiệu về ReactJS', 0),
-(8, 1, 2, N'Chương 1: Giới thiệu về ReactJS', 0),
-(8, 1, 1, N'Chương 2: JSX và Components', 0),
-(8, 1, 2, N'Chương 2: JSX và Components', 0),
-(8, 1, 1, N'Chương 3: State và Props', 0),
-(8, 1, 2, N'Chương 3: State và Props', 0),
-(8, 1, 1, N'Chương 4: React Hooks', 0),
-(8, 1, 2, N'Chương 4: React Hooks', 0);
+(8, 1, 1, N'Chương 1: Giới thiệu về ReactJS', 2),
+(8, 1, 2, N'Chương 1: Giới thiệu về ReactJS', 7),
+(8, 1, 1, N'Chương 2: JSX và Components', 8),
+(8, 1, 2, N'Chương 2: JSX và Components', 5),
+(8, 1, 1, N'Chương 3: State và Props', 6),
+(8, 1, 2, N'Chương 3: State và Props', 8),
+(8, 1, 1, N'Chương 4: React Hooks', 5),
+(8, 1, 2, N'Chương 4: React Hooks', 6);
 
 -- Student 8 - Course 3 (SQL)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(8, 3, 1, N'Chương 1: Cơ sở về SQL', 0),
-(8, 3, 2, N'Chương 1: Cơ sở về SQL', 0),
-(8, 3, 1, N'Chương 2: Truy vấn cơ bản', 0),
-(8, 3, 2, N'Chương 2: Truy vấn cơ bản', 0),
-(8, 3, 1, N'Chương 3: Joins và Subqueries', 0),
-(8, 3, 2, N'Chương 3: Joins và Subqueries', 0),
-(8, 3, 1, N'Chương 4: Stored Procedures', 0),
-(8, 3, 2, N'Chương 4: Stored Procedures', 0);
+(8, 3, 1, N'Chương 1: Cơ sở về SQL', 5),
+(8, 3, 2, N'Chương 1: Cơ sở về SQL', 4),
+(8, 3, 1, N'Chương 2: Truy vấn cơ bản', 5),
+(8, 3, 2, N'Chương 2: Truy vấn cơ bản', 6),
+(8, 3, 1, N'Chương 3: Joins và Subqueries', 5),
+(8, 3, 2, N'Chương 3: Joins và Subqueries', 5),
+(8, 3, 1, N'Chương 4: Stored Procedures', 6),
+(8, 3, 2, N'Chương 4: Stored Procedures', 7);
 
 -- Student 9 - Course 2 (Android)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(9, 2, 1, N'Chương 1: Cơ bản về Android', 0),
-(9, 2, 2, N'Chương 1: Cơ bản về Android', 0),
-(9, 2, 1, N'Chương 2: Layout và UI', 0),
-(9, 2, 2, N'Chương 2: Layout và UI', 0),
-(9, 2, 1, N'Chương 3: Activities và Intents', 0),
-(9, 2, 2, N'Chương 3: Activities và Intents', 0),
-(9, 2, 1, N'Chương 4: Data Storage', 0),
-(9, 2, 2, N'Chương 4: Data Storage', 0);
+(9, 2, 1, N'Chương 1: Cơ bản về Android', 8),
+(9, 2, 2, N'Chương 1: Cơ bản về Android', 8),
+(9, 2, 1, N'Chương 2: Layout và UI', 9),
+(9, 2, 2, N'Chương 2: Layout và UI', 7),
+(9, 2, 1, N'Chương 3: Activities và Intents', 9),
+(9, 2, 2, N'Chương 3: Activities và Intents', 8),
+(9, 2, 1, N'Chương 4: Data Storage', 9),
+(9, 2, 2, N'Chương 4: Data Storage', 9);
 
 -- Student 9 - Course 4 (ML)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(9, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 0),
-(9, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 0),
-(9, 4, 1, N'Chương 2: Supervised Learning', 0),
-(9, 4, 2, N'Chương 2: Supervised Learning', 0),
-(9, 4, 1, N'Chương 3: Unsupervised Learning', 0),
-(9, 4, 2, N'Chương 3: Unsupervised Learning', 0),
-(9, 4, 1, N'Chương 4: Deep Learning', 0),
-(9, 4, 2, N'Chương 4: Deep Learning', 0);
+(9, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 9),
+(9, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 7),
+(9, 4, 1, N'Chương 2: Supervised Learning', 8),
+(9, 4, 2, N'Chương 2: Supervised Learning', 7),
+(9, 4, 1, N'Chương 3: Unsupervised Learning', 8),
+(9, 4, 2, N'Chương 3: Unsupervised Learning', 9),
+(9, 4, 1, N'Chương 4: Deep Learning', 9),
+(9, 4, 2, N'Chương 4: Deep Learning', 9);
 
 -- Student 10 - Course 3 (SQL)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(10, 3, 1, N'Chương 1: Cơ sở về SQL', 0),
-(10, 3, 2, N'Chương 1: Cơ sở về SQL', 0),
-(10, 3, 1, N'Chương 2: Truy vấn cơ bản', 0),
-(10, 3, 2, N'Chương 2: Truy vấn cơ bản', 0),
-(10, 3, 1, N'Chương 3: Joins và Subqueries', 0),
-(10, 3, 2, N'Chương 3: Joins và Subqueries', 0),
-(10, 3, 1, N'Chương 4: Stored Procedures', 0),
-(10, 3, 2, N'Chương 4: Stored Procedures', 0);
+(10, 3, 1, N'Chương 1: Cơ sở về SQL', 6),
+(10, 3, 2, N'Chương 1: Cơ sở về SQL', 5),
+(10, 3, 1, N'Chương 2: Truy vấn cơ bản', 6),
+(10, 3, 2, N'Chương 2: Truy vấn cơ bản', 7),
+(10, 3, 1, N'Chương 3: Joins và Subqueries', 6),
+(10, 3, 2, N'Chương 3: Joins và Subqueries', 5),
+(10, 3, 1, N'Chương 4: Stored Procedures', 6),
+(10, 3, 2, N'Chương 4: Stored Procedures', 6);
 
 -- Student 11 - Course 4 (ML)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(11, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 0),
-(11, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 0),
-(11, 4, 1, N'Chương 2: Supervised Learning', 0),
-(11, 4, 2, N'Chương 2: Supervised Learning', 0),
-(11, 4, 1, N'Chương 3: Unsupervised Learning', 0),
-(11, 4, 2, N'Chương 3: Unsupervised Learning', 0),
-(11, 4, 1, N'Chương 4: Deep Learning', 0),
-(11, 4, 2, N'Chương 4: Deep Learning', 0);
+(11, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 5),
+(11, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 5),
+(11, 4, 1, N'Chương 2: Supervised Learning', 5),
+(11, 4, 2, N'Chương 2: Supervised Learning', 5),
+(11, 4, 1, N'Chương 3: Unsupervised Learning', 8),
+(11, 4, 2, N'Chương 3: Unsupervised Learning', 8),
+(11, 4, 1, N'Chương 4: Deep Learning', 9),
+(11, 4, 2, N'Chương 4: Deep Learning', 8);
 
 
 
@@ -1387,6 +1387,8 @@ GO
 
 
 ---------------------------------------------------------------------2.4---------------------------------------------------------------------
+-- Hàm tính tổng doanh thu từ các đơn hàng của một khóa học
+
 GO
 CREATE FUNCTION CalculateTotalRevenue
 (
@@ -1395,54 +1397,54 @@ CREATE FUNCTION CalculateTotalRevenue
 RETURNS INT
 AS
 BEGIN
-    -- Declare variables
     DECLARE @TotalRevenue INT = 0;
     DECLARE @OrderID INT;
     DECLARE @CoursePrice INT;
 
-    -- Check if the CourseID exists in the Course table
+    -- Kiểm tra xem CourseID có tồn tại trong bảng
     IF NOT EXISTS (SELECT 1 FROM Course WHERE CourseID = @CourseID)
     BEGIN
-        RETURN -1; -- Indicate invalid input without using RAISERROR
+        RETURN -1; -- Trả về -1 nếu CourseID không hợp lệ
     END
 
-    -- Declare a pointer to iterate through all orders related to the course
+    -- Khai báo con trỏ để lặp qua các đơn hàng liên quan đến khóa học
     DECLARE OrderCursor CURSOR FOR
     SELECT OrderID FROM CourseOrder WHERE CourseID = @CourseID;
 
-    -- Open the cursor
+    -- Mở con trỏ để lấy OrderID đầu tiên
     OPEN OrderCursor;
-    FETCH NEXT FROM OrderCursor INTO @OrderID;
+    FETCH NEXT FROM OrderCursor INTO @OrderID; -- Lấy OrderID đầu tiên
 
-    -- Loop through orders
-    WHILE @@FETCH_STATUS = 0
+    -- Lặp qua các đơn hàng để tính tổng doanh thu
+    WHILE @@FETCH_STATUS = 0 -- Nếu còn dữ liệu
     BEGIN
-        -- Get the price of the course
+        -- Lấy giá khoá học từ bảng Course
         SELECT @CoursePrice = CoursePrice FROM Course WHERE CourseID = @CourseID;
-        -- Add the price to the total revenue
+        -- Cộng vào tổng doanh thu
         SET @TotalRevenue = @TotalRevenue + @CoursePrice;
 
-        -- Move to the next order
+        -- Lấy OrderID tiếp theo
         FETCH NEXT FROM OrderCursor INTO @OrderID;
     END
 
-    -- Close and deallocate the cursor
+    -- Đóng con trỏ và thu hồi bộ nhớ
     CLOSE OrderCursor;
     DEALLOCATE OrderCursor;
 
-    -- Return the total revenue
+    -- Trả về tổng doanh thu
     RETURN @TotalRevenue;
 END;
 GO
 
 DECLARE @Revenue INT;
-SET @Revenue = dbo.CalculateTotalRevenue(1); -- Calculate revenue for CourseID = 1
+SET @Revenue = dbo.CalculateTotalRevenue(1); -- Tính tổng doanh thu từ khóa học có CourseID = 1
 PRINT 'Total Revenue: ' + CAST(@Revenue AS NVARCHAR);
 
 
 
 
 ------
+-- Hàm tính điểm trung bình của một học sinh
 GO
 CREATE FUNCTION CalculateAverageTestScore
 (
@@ -1451,7 +1453,6 @@ CREATE FUNCTION CalculateAverageTestScore
 RETURNS FLOAT
 AS
 BEGIN
-    -- Declare variables
     DECLARE @TotalScore FLOAT = 0;
     DECLARE @TestCount INT = 0;
     DECLARE @AverageScore FLOAT = 0;
@@ -1460,47 +1461,46 @@ BEGIN
     DECLARE @TestOrder INT;
     DECLARE @ChapterName NVARCHAR(255);
 
-    -- Check if the StudentID exists in the Student table
+    -- Kiểm tra xem StudentID có tồn tại trong bảng
     IF NOT EXISTS (SELECT 1 FROM Student WHERE StudentID = @StudentID)
     BEGIN
-        RAISERROR('Invalid StudentID. Student does not exist.', 16, 1);
-        RETURN -1; -- Indicate invalid input
+        RETURN -1; -- Trả về -1 nếu StudentID không hợp lệ
     END
 
-    -- Declare a pointer to iterate through all tests related to the student
+    -- Khai báo con trỏ để lặp qua các bài kiểm tra của học sinh
     DECLARE TestCursor CURSOR FOR
     SELECT CourseID, TestOrder, ChapterName, TestScore
     FROM Student_Test
     WHERE StudentID = @StudentID;
 
-    -- Open the cursor
+    -- Mở con trỏ để lấy bài kiểm tra đầu tiên
     OPEN TestCursor;
     FETCH NEXT FROM TestCursor INTO @CourseID, @TestOrder, @ChapterName, @TestScore;
 
-    -- Loop through test scores
+    -- Lặp qua các bài kiểm tra để tính điểm trung bình
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        -- Add the test score to the total
+        -- Cộng vào tổng điểm
         SET @TotalScore = @TotalScore + @TestScore;
-        -- Increment the test count
+        -- Đếm số lượng bài kiểm tra
         SET @TestCount = @TestCount + 1;
 
-        -- Move to the next test
+        -- Lấy bài kiểm tra tiếp theo
         FETCH NEXT FROM TestCursor INTO @CourseID, @TestOrder, @ChapterName, @TestScore;
     END
 
-    -- Close and deallocate the cursor
+    -- Đóng con trỏ và thu hồi bộ nhớ
     CLOSE TestCursor;
     DEALLOCATE TestCursor;
 
-    -- Calculate the average if there are tests
+    -- Tính điểm trung bình
     IF @TestCount > 0
     BEGIN
         SET @AverageScore = @TotalScore / @TestCount;
     END
     ELSE
     BEGIN
-        RETURN 0; -- No tests found, return 0
+        RETURN 0; -- Trả về 0 nếu không có bài kiểm tra nào
     END
 
     -- Return the average score
@@ -1509,9 +1509,8 @@ END;
 GO
 
 DECLARE @AvgScore FLOAT;
-SET @AvgScore = dbo.CalculateAverageTestScore(7); -- Calculate average score for StudentID = 7
+SET @AvgScore = dbo.CalculateAverageTestScore(8); -- Tính điểm trung bình của học sinh có StudentID = 8
 PRINT 'Average Test Score: ' + CAST(@AvgScore AS NVARCHAR);
-
 
 
 
