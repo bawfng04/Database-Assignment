@@ -420,9 +420,166 @@ BEGIN
 END;
 
 
+-- Trigger khi insert dữ liệu vào bảng Student
+GO
+CREATE TRIGGER trg_Student_Insert
+ON Student
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @OptionName NVARCHAR(255), @QuestionID INT, @StudentID INT;
+
+    SELECT @OptionName = OptionName, @QuestionID = QuestionID, @StudentID = StudentID
+    FROM inserted;
+
+    -- Validate OptionName
+    IF @OptionName IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Options WHERE OptionName = @OptionName)
+    BEGIN
+        RAISERROR ('OptionName does not exist in Options table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate QuestionID
+    IF @QuestionID IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Question WHERE QuestionID = @QuestionID)
+    BEGIN
+        RAISERROR ('QuestionID does not exist in Question table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- If validation passes, insert the data
+    INSERT INTO Student (StudentID, OptionName, QuestionID)
+    SELECT StudentID, OptionName, QuestionID
+    FROM inserted;
+END;
+GO
+
+
+-- Trigger khi insert dữ liệu vào bảng Category
+GO
+CREATE TRIGGER trg_Category_Insert
+ON Category
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @CategoryName NVARCHAR(255), @CategoryDescription NVARCHAR(255);
+
+    SELECT @CategoryName = CategoryName, @CategoryDescription = CategoryDescription
+    FROM inserted;
+
+    -- Validate CategoryName
+    IF @CategoryName IS NULL
+    BEGIN
+        RAISERROR ('CategoryName cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CategoryDescription
+    IF @CategoryDescription IS NULL
+    BEGIN
+        RAISERROR ('CategoryDescription cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- If validation passes, insert the data
+    INSERT INTO Category (CategoryName, CategoryDescription)
+    SELECT CategoryName, CategoryDescription
+    FROM inserted;
+END;
 
 
 
+
+-- Trigger khi insert dữ liệu vào bảng Course
+GO
+CREATE TRIGGER trg_Course_Insert
+ON Course
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @CourseName NVARCHAR(255), @CourseStatus NVARCHAR(255), @CourseDescription NVARCHAR(255),
+            @CoursePrice INT, @CourseImage NVARCHAR(255), @CourseStartDate DATE, @CourseEndDate DATE,
+            @CategoryID INT;
+
+    SELECT @CourseName = CourseName, @CourseStatus = CourseStatus, @CourseDescription = CourseDescription,
+            @CoursePrice = CoursePrice, @CourseImage = CourseImage, @CourseStartDate = CourseStartDate,
+            @CourseEndDate = CourseEndDate, @CategoryID = CategoryID
+    FROM inserted;
+
+    -- Validate CourseName
+    IF @CourseName IS NULL
+    BEGIN
+        RAISERROR ('CourseName cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseStatus
+    IF @CourseStatus IS NULL
+    BEGIN
+        RAISERROR ('CourseStatus cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseDescription
+    IF @CourseDescription IS NULL
+    BEGIN
+        RAISERROR ('CourseDescription cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CoursePrice
+    IF @CoursePrice IS NULL
+    BEGIN
+        RAISERROR ('CoursePrice cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseImage
+    IF @CourseImage IS NULL
+    BEGIN
+        RAISERROR ('CourseImage cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseStartDate
+    IF @CourseStartDate IS NULL
+    BEGIN
+        RAISERROR ('CourseStartDate cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseEndDate
+    IF @CourseEndDate IS NULL
+    BEGIN
+        RAISERROR ('CourseEndDate cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CategoryID
+    IF NOT EXISTS (SELECT 1 FROM Category WHERE CategoryID = @CategoryID)
+    BEGIN
+        RAISERROR ('CategoryID does not exist in Category table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+
+    END
+
+
+    -- If validation passes, insert the data
+    INSERT INTO Course (CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID)
+    SELECT CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID
+    FROM inserted;
+END;
 
 
 
