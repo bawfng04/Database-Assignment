@@ -9,6 +9,8 @@ const config = {
   options: {
     encrypt: false,
     trustServerCertificate: false,
+    useUnicode: true,
+    charset: "UTF-8",
   },
 };
 
