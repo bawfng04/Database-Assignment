@@ -303,6 +303,131 @@ CREATE TABLE Review(
 
 ------------ INSERT/UPDATE/DELETE - PROCEDURE/FUNCTION/TRIGGER ----------------
 
+
+
+
+
+
+
+
+
+
+
+
+--------------- TRIGGER để check trước khi insert dữ liệu
+-- Trigger khi insert dữ liệu vào bảng Users
+GO
+CREATE TRIGGER trg_Users_Insert
+ON Users
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @UserEmail NVARCHAR(255), @UserPhone VARCHAR(10);
+
+    SELECT @UserEmail = UserEmail, @UserPhone = UserPhone
+    FROM inserted;
+
+    -- Validate UserEmail
+    IF @UserEmail IS NULL OR @UserEmail NOT LIKE '%_@__%.__%'
+    BEGIN
+        RAISERROR ('Invalid email format', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate UserPhone
+    IF LEN(@UserPhone) <> 10 OR @UserPhone NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+    BEGIN
+        RAISERROR ('Invalid phone number', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate unique UserEmail
+    IF EXISTS (SELECT 1 FROM Users WHERE UserEmail = @UserEmail)
+    BEGIN
+        RAISERROR ('UserEmail must be unique', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate unique UserPhone
+    IF EXISTS (SELECT 1 FROM Users WHERE UserPhone = @UserPhone)
+    BEGIN
+        RAISERROR ('UserPhone must be unique', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- nếu không có lỗi thì insert dữ liệu
+    INSERT INTO Users (UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username)
+    SELECT UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username
+    FROM inserted;
+END;
+
+
+--trigger cho bảng teacher
+GO
+CREATE TRIGGER trg_Teacher_Insert
+ON Teacher
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @TeacherDescription NVARCHAR(255);
+
+    SELECT @TeacherDescription = TeacherDescription
+    FROM inserted;
+
+    -- Validate TeacherDescription
+    IF @TeacherDescription IS NULL
+    BEGIN
+        RAISERROR ('TeacherDescription cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- nếu không có lỗi thì insert dữ liệu
+    INSERT INTO Teacher (TeacherID, TeacherDescription)
+    SELECT TeacherID, TeacherDescription
+    FROM inserted;
+END;
+
+
+-- Trigger khi insert dữ liệu vào bảng Admin
+GO
+CREATE TRIGGER trg_Admin_Insert
+ON Admin
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @AdminID INT;
+
+    SELECT @AdminID = AdminID
+    FROM inserted;
+
+    -- Validate AdminID exists in Users table
+    IF NOT EXISTS (SELECT 1 FROM Users WHERE UsernameID = @AdminID)
+    BEGIN
+        RAISERROR ('AdminID does not exist in Users table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- If validation passes, insert the data
+    INSERT INTO Admin (AdminID)
+    SELECT AdminID
+    FROM inserted;
+END;
+
+
+
+
+
+
+
+
+---------------------------------------- Dữ liệu mẫu ----------------------------------------
+
 -- Insert Users
 INSERT INTO Users (UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username) VALUES
 -- Admins
