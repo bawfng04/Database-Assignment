@@ -10,30 +10,30 @@
   <% if (typeof message !== 'undefined') { %>
     <div class="alert"><%= message %></div>
   <% } %>
-<form action="/coupon" method="POST">
-  <label for="CouponTitle">Title:</label>
-  <input type="text" id="CouponTitle" name="CouponTitle" required />
+  <form action="/coupon" method="POST">
+    <label for="CouponTitle">Title:</label>
+    <input type="text" id="CouponTitle" name="CouponTitle" required />
 
-  <label for="CouponValue">Value:</label>
-  <input type="number" id="CouponValue" name="CouponValue" required />
+    <label for="CouponValue">Value:</label>
+    <input type="number" id="CouponValue" name="CouponValue" required />
 
-  <label for="CouponType">Type:</label>
-  <select id="CouponType" name="CouponType" required>
-    <option value="percent">Phần trăm</option>
-    <option value="fixed">Giá trị</option>
-  </select>
+    <label for="CouponType">Type:</label>
+    <select id="CouponType" name="CouponType" required>
+      <option value="percent">Phần trăm</option>
+      <option value="fixed">Giá trị</option>
+    </select>
 
-  <label for="CouponStartDate">Start Date:</label>
-  <input type="date" id="CouponStartDate" name="CouponStartDate" required />
+    <label for="CouponStartDate">Start Date:</label>
+    <input type="date" id="CouponStartDate" name="CouponStartDate" required />
 
-  <label for="CouponExpire">End Date:</label>
-  <input type="date" id="CouponExpire" name="CouponExpire" required />
+    <label for="CouponExpire">End Date:</label>
+    <input type="date" id="CouponExpire" name="CouponExpire" required />
 
-  <label for="CouponMaxDiscount">Max Discount:</label>
-  <input type="number" id="CouponMaxDiscount" name="CouponMaxDiscount" required />
+    <label for="CouponMaxDiscount">Max Discount:</label>
+    <input type="number" id="CouponMaxDiscount" name="CouponMaxDiscount" required />
 
-  <button type="submit">Create</button>
-</form>
+    <button type="submit">Create</button>
+  </form>
   <button onclick="window.location.href='/coupon'">Go Back</button>
 </body>
 </html>

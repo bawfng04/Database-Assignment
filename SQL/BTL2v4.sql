@@ -311,7 +311,8 @@ CREATE PROCEDURE InsertCoupon
     @CouponType NVARCHAR(255),
     @CouponStartDate DATE,
     @CouponExpire DATE,
-    @CouponMaxDiscount INT
+    @CouponMaxDiscount INT,
+    @ErrorMessage NVARCHAR(255) OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -430,8 +431,12 @@ BEGIN
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION
 
-        PRINT 'Lỗi: ' + ERROR_MESSAGE()
 
+
+        -- PRINT 'Lỗi: ' + ERROR_MESSAGE()
+        SET @ErrorMessage = ERROR_MESSAGE()
+        PRINT @ErrorMessage
+        RETURN
     END CATCH
 END
 GO
@@ -450,7 +455,8 @@ CREATE PROCEDURE UpdateCoupon
     @CouponType VARCHAR(255),
     @CouponStartDate DATE,
     @CouponExpire DATE,
-    @CouponMaxDiscount DECIMAL(10,2)
+    @CouponMaxDiscount DECIMAL(10,2),
+    @ErrorMessage NVARCHAR(255) OUTPUT
 AS
 BEGIN
     BEGIN TRY
@@ -536,6 +542,8 @@ BEGIN
             ROLLBACK TRANSACTION
 
         PRINT 'Lỗi: ' + ERROR_MESSAGE()
+        SET @ErrorMessage = ERROR_MESSAGE()
+        RETURN
     END CATCH
 END
 GO
@@ -589,11 +597,12 @@ GO
 
 --test
 SELECT * FROM Coupon
-EXEC InsertCoupon 'Mã giảm giá 1', 10, 'percent', '2021-01-01', '2021-12-31', 100
-EXEC InsertCoupon 'Mã giảm giá 2', 100000, 'fixed', '2021-01-01', '2021-12-31', 100000
+EXEC InsertCoupon 'Mã giảm giá 1', 10, 'percent', '2028-01-01', '2029-12-31', 100
+EXEC InsertCoupon 'Mã giảm giá 2', 100000, 'fixed', '2029-01-01', '2029-12-31', 100000
+EXEC InsertCoupon 'Mã giảm giá 3', 100000, 'percent', '2029-01-01', '2029-12-31', 100000
 
-EXEC UpdateCoupon '1', 'Mã giảm giá 1', 20, 'percent', '2021-01-01', '2021-12-31', 100
-EXEC UpdateCoupon '2', 'Mã giảm giá 2', 200000, 'fixed', '2021-01-01', '2021-12-31', 100000
+EXEC UpdateCoupon '1', 'Mã giảm giá 1', 20, 'percent', '2029-01-01', '2029-12-31', 100
+EXEC UpdateCoupon '2', 'Mã giảm giá 2', 200000, 'fixed', '2029-01-01', '2029-12-31', 100000
 
 EXEC DeleteCoupon '1'
 EXEC DeleteCoupon '2'

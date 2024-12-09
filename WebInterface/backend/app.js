@@ -257,9 +257,9 @@ app.get("/coupon", async (req, res) => {
 });
 
 app.get("/coupon/new", (req, res) => {
-  res.render("newCoupon");
+  const message = req.query.message;
+  res.render("newCoupon", { message });
 });
-
 
 // Update the get route to handle the message
 app.get("/coupon/edit/:id", async (req, res) => {
@@ -279,7 +279,6 @@ app.get("/coupon/edit/:id", async (req, res) => {
   }
 });
 
-
 //dùng procedure create coupon để tạo coupon
 // Use the InsertCoupon procedure to create coupon
 app.post("/coupon", async (req, res) => {
@@ -293,7 +292,7 @@ app.post("/coupon", async (req, res) => {
   } = req.body;
   try {
     const pool = await poolPromise;
-    await pool
+    const result = await pool
       .request()
       .input("CouponTitle", sql.NVarChar, CouponTitle)
       .input("CouponValue", sql.Int, CouponValue)
@@ -301,15 +300,20 @@ app.post("/coupon", async (req, res) => {
       .input("CouponStartDate", sql.Date, CouponStartDate)
       .input("CouponExpire", sql.Date, CouponExpire)
       .input("CouponMaxDiscount", sql.Int, CouponMaxDiscount)
+      .output("ErrorMessage", sql.NVarChar)
       .execute("InsertCoupon"); // Call the stored procedure
+
+    const ErrorMessage = result.output.ErrorMessage;
+    if (ErrorMessage) {
+      throw new Error(ErrorMessage);
+    }
 
     res.redirect("/coupon");
   } catch (err) {
     console.error("Error creating coupon:", err);
-    res.status(500).send("Error creating coupon.");
+    res.redirect(`/coupon/new?message=${encodeURIComponent(err.message)}`);
   }
 });
-
 
 //dùng procedure update coupon để sửa coupon
 // Use the UpdateCoupon procedure to update coupon
@@ -324,9 +328,8 @@ app.post("/coupon/edit/:id", async (req, res) => {
     CouponMaxDiscount,
   } = req.body;
   try {
-    // alert("hello");
     const pool = await poolPromise;
-    await pool
+    const result = await pool
       .request()
       .input("CouponID", sql.Int, id)
       .input("CouponTitle", sql.NVarChar, CouponTitle)
@@ -335,19 +338,20 @@ app.post("/coupon/edit/:id", async (req, res) => {
       .input("CouponStartDate", sql.Date, CouponStartDate)
       .input("CouponExpire", sql.Date, CouponExpire)
       .input("CouponMaxDiscount", sql.Int, CouponMaxDiscount)
+      .output("ErrorMessage", sql.NVarChar)
       .execute("UpdateCoupon"); // Call the stored procedure
 
-
-
-
-
-    //print the message
+    const errorMessage = result.output.ErrorMessage;
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
 
     res.redirect("/coupon");
   } catch (err) {
-    // console.error("Error updating coupon:", err);
-    console.log(err);
-    res.status(500).send("Error updating coupon.");
+    console.error("Error updating coupon:", err);
+    res.redirect(
+      `/coupon/edit/${id}?message=${encodeURIComponent(err.message)}`
+    );
   }
 });
 
