@@ -26,7 +26,7 @@
         <th>OrderPaymentStatus</th>
         <th>OrderDate</th>
         <th>OrderTotalAmount</th>
-        <th>CartID</th>
+        <th>CouponID</th>
         <th>PaymentCode</th>
         <!-- Add more columns if needed -->
       </tr>
@@ -37,9 +37,9 @@
           <td><%= order.OrderID %></td>
           <td><%= order.OrderPaymentStatus %></td>
           <td><%= order.OrderDate %></td>
-          <td><%= order.OrderTotalAmount %></td>
-          <td><%= order.CartID %></td>
-          <td><%= order.PaymentCode %></td>
+          <td><%= order.TotalAmount %></td>
+          <td><%= order.CouponID %></td>
+          <td><%= order.OrderPaymentCode %></td>
           <!-- Add more columns if needed -->
         </tr>
       <% }) %>

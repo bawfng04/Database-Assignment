@@ -31,8 +31,6 @@ CREATE TABLE Category(
     CategoryDescription NVARCHAR(255),
 );
 
-
-
 --Bảng khoá học
 CREATE TABLE Course(
     CourseID INT PRIMARY KEY,
@@ -48,7 +46,6 @@ CREATE TABLE Course(
 
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
 );
-
 
 --Chương
 CREATE TABLE Chapter(
@@ -296,143 +293,6 @@ CREATE TABLE Review(
     FOREIGN KEY (CourseID) REFERENCES Course(CourseID),
     FOREIGN KEY (StudentID) REFERENCES Student(StudentID)
 );
-
--- GO
--- CREATE PROCEDURE InsertCoupon
---     @CouponTitle NVARCHAR(255),
---     @CouponValue INT,
---     @CouponType NVARCHAR(255),
---     @CouponStartDate DATE,
---     @CouponExpire DATE,
---     @CouponMaxDiscount INT,
---     @ErrorMessage NVARCHAR(255) OUTPUT
--- AS
--- BEGIN
---     SET NOCOUNT ON;
---     BEGIN TRY
---         -- Validate nulls
---         IF @CouponTitle IS NULL OR @CouponValue IS NULL OR @CouponType IS NULL OR
---            @CouponStartDate IS NULL OR @CouponExpire IS NULL OR @CouponMaxDiscount IS NULL
---         BEGIN
---             PRINT 'Lỗi: Dữ liệu không được để trống.'
---             RAISERROR('Dữ liệu không được để trống.', 16, 1)
---             RETURN
---         END
-
---         -- Validate title
---         IF LEN(TRIM(@CouponTitle)) = 0
---         BEGIN
---             PRINT 'Lỗi: Tiêu đề mã giảm giá không được để trống.'
---             RAISERROR('Tiêu đề mã giảm giá không được để trống.', 16, 1)
---             RETURN
---         END
-
---         -- Validate type
---         IF @CouponType NOT IN ('percent', 'fixed')
---         BEGIN
---             PRINT 'Lỗi: Loại mã giảm giá không hợp lệ.'
---             RAISERROR('Loại mã giảm giá không hợp lệ.', 16, 1)
---             RETURN
---         END
-
---         -- Validate value
---         IF @CouponValue <= 0
---         BEGIN
---             PRINT 'Lỗi: Giá trị mã giảm giá phải lớn hơn 0.'
---             RAISERROR('Giá trị mã giảm giá phải lớn hơn 0.', 16, 1)
---             RETURN
---         END
-
---         -- Validate dates
---         IF @CouponStartDate < GETDATE()
---         BEGIN
---             PRINT 'Lỗi: Ngày bắt đầu không được trong quá khứ.'
---             RAISERROR('Ngày bắt đầu không được trong quá khứ.', 16, 1)
---             RETURN
---         END
-
---         IF @CouponStartDate >= @CouponExpire
---         BEGIN
---             PRINT 'Lỗi: Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.'
---             RAISERROR('Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.', 16, 1)
---             RETURN
---         END
-
---         -- Validate max discount
---         IF @CouponMaxDiscount < 0
---         BEGIN
---             PRINT 'Lỗi: Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.'
---             RAISERROR('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.', 16, 1)
---             RETURN
---         END
-
---         -- Validate percentage type
---         IF @CouponType = 'percent' AND (@CouponValue > 100 OR @CouponValue < 0)
---         BEGIN
---             PRINT 'Lỗi: Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.'
---             RAISERROR('Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.', 16, 1)
---             RETURN
---         END
-
---         -- Validate value type
---         IF @CouponType = 'fixed' AND @CouponValue <= 0
---         BEGIN
---             PRINT 'Lỗi: Giá trị giảm giá phải lớn hơn 0.'
---             RAISERROR('Giá trị giảm giá phải lớn hơn 0.', 16, 1)
---             RETURN
---         END
-
---         -- Check duplicate title
---         IF EXISTS (SELECT 1 FROM Coupon WHERE CouponTitle = @CouponTitle)
---         BEGIN
---             PRINT 'Lỗi: Tiêu đề mã giảm giá đã tồn tại.'
---             RAISERROR('Tiêu đề mã giảm giá đã tồn tại.', 16, 1)
---             RETURN
---         END
-
---         --nếu type = giá trị thì max discount phải <= value
---         IF @CouponType = 'fixed' AND @CouponMaxDiscount > @CouponValue
---         BEGIN
---             PRINT 'Lỗi: Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.'
---             RAISERROR('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.', 16, 1)
---             RETURN
---         END
-
---         -- Insert with transaction
---         BEGIN TRANSACTION
---             INSERT INTO Coupon (
---                 CouponTitle,
---                 CouponValue,
---                 CouponType,
---                 CouponStartDate,
---                 CouponExpire,
---                 CouponMaxDiscount
---             )
---             VALUES (
---                 @CouponTitle,
---                 @CouponValue,
---                 @CouponType,
---                 @CouponStartDate,
---                 @CouponExpire,
---                 @CouponMaxDiscount
---             )
---         COMMIT TRANSACTION
-
---         PRINT 'Thêm mã giảm giá thành công.'
---     END TRY
---     BEGIN CATCH
---         IF @@TRANCOUNT > 0
---             ROLLBACK TRANSACTION
-
-
-
---         -- PRINT 'Lỗi: ' + ERROR_MESSAGE()
---         SET @ErrorMessage = ERROR_MESSAGE()
---         PRINT @ErrorMessage
---         RETURN
---     END CATCH
--- END
--- GO
 
 ---TRIGGER 1
 GO
@@ -2253,35 +2113,6 @@ END;
 
 
 -- Procedure 2: Lấy danh sách các mã giảm giá hợp lệ
--- GO
--- CREATE OR ALTER PROCEDURE sp_GetValidCoupons
--- AS
--- BEGIN
---     DECLARE @CurrentDate DATE = GETDATE();
-
---     SELECT
---         c.CouponID,
---         c.CouponTitle,
---         c.CouponValue,
---         c.CouponType,
---         c.CouponStartDate,
---         c.CouponExpire,
---         c.CouponMaxDiscount,
---         (
---             SELECT COUNT(DISTINCT co.CourseID)
---             FROM Orders o, CourseOrder co
---             WHERE o.CouponID = c.CouponID
---             AND co.OrderID = o.OrderID
---         ) as TotalAffectedCourses
---     FROM Coupon c
---     WHERE c.CouponStartDate <= @CurrentDate
---     AND c.CouponExpire >= @CurrentDate
---     ORDER BY TotalAffectedCourses DESC, c.CouponExpire ASC;
--- END;
-
--- EXEC GetCoursesInCategoryByMinRating @CategoryName = N'Lập trình', @MinRating = 4.0
-
--- EXEC sp_GetValidCoupons;
 
 GO
 CREATE PROCEDURE sp_GetValidCoupons
