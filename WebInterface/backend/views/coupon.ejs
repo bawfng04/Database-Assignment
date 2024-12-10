@@ -27,7 +27,7 @@
   <!-- View Valid Coupons Button -->
 <form method="GET" action="/coupon">
   <input type="hidden" name="viewValid" value="<%= viewValid ? 'false' : 'true' %>">
-  <button type="submit"><%= viewValid ? 'View All Coupons' : 'View Valid Coupons' %></button>
+  <button type="submit"><%= viewValid ? 'View All Coupons' : 'View Coupons can be applied now' %></button>
 </form>
 
   <% if (typeof message !== 'undefined') { %>

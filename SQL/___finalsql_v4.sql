@@ -1618,7 +1618,314 @@ INSERT INTO Edit (EditTime, EditDescription, EditAdminID, EditCouponID, EditCour
 
 
 ---------------------------------------------------------------------2.1---------------------------------------------------------------------
+-- INSERT COUPON
+GO
+CREATE PROCEDURE InsertCoupon
+    @CouponTitle NVARCHAR(255),
+    @CouponValue INT,
+    @CouponType NVARCHAR(255),
+    @CouponStartDate DATE,
+    @CouponExpire DATE,
+    @CouponMaxDiscount INT,
+    @ErrorMessage NVARCHAR(255) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        -- Validate nulls
+        IF @CouponTitle IS NULL OR @CouponValue IS NULL OR @CouponType IS NULL OR
+           @CouponStartDate IS NULL OR @CouponExpire IS NULL OR @CouponMaxDiscount IS NULL
+        BEGIN
+            PRINT 'Lỗi: Dữ liệu không được để trống.'
+            RAISERROR('Dữ liệu không được để trống.', 16, 1)
+            RETURN
+        END
 
+        -- Validate title
+        IF LEN(TRIM(@CouponTitle)) = 0
+        BEGIN
+            PRINT 'Lỗi: Tiêu đề mã giảm giá không được để trống.'
+            RAISERROR('Tiêu đề mã giảm giá không được để trống.', 16, 1)
+            RETURN
+        END
+
+        -- Validate type
+        IF @CouponType NOT IN ('percent', 'fixed')
+        BEGIN
+            PRINT 'Lỗi: Loại mã giảm giá không hợp lệ.'
+            RAISERROR('Loại mã giảm giá không hợp lệ.', 16, 1)
+            RETURN
+        END
+
+        -- Validate value
+        IF @CouponValue <= 0
+        BEGIN
+            PRINT 'Lỗi: Giá trị mã giảm giá phải lớn hơn 0.'
+            RAISERROR('Giá trị mã giảm giá phải lớn hơn 0.', 16, 1)
+            RETURN
+        END
+
+        -- Validate dates
+        IF @CouponStartDate < GETDATE()
+        BEGIN
+            PRINT 'Lỗi: Ngày bắt đầu không được trong quá khứ.'
+            RAISERROR('Ngày bắt đầu không được trong quá khứ.', 16, 1)
+            RETURN
+        END
+
+        IF @CouponStartDate >= @CouponExpire
+        BEGIN
+            PRINT 'Lỗi: Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.'
+            RAISERROR('Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.', 16, 1)
+            RETURN
+        END
+
+        -- Validate max discount
+        IF @CouponMaxDiscount < 0
+        BEGIN
+            PRINT 'Lỗi: Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.'
+            RAISERROR('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.', 16, 1)
+            RETURN
+        END
+
+        -- Validate percentage type
+        IF @CouponType = 'percent' AND (@CouponValue > 100 OR @CouponValue < 0)
+        BEGIN
+            PRINT 'Lỗi: Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.'
+            RAISERROR('Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.', 16, 1)
+            RETURN
+        END
+
+        -- Validate value type
+        IF @CouponType = 'fixed' AND @CouponValue <= 0
+        BEGIN
+            PRINT 'Lỗi: Giá trị giảm giá phải lớn hơn 0.'
+            RAISERROR('Giá trị giảm giá phải lớn hơn 0.', 16, 1)
+            RETURN
+        END
+
+        -- Check duplicate title
+        IF EXISTS (SELECT 1 FROM Coupon WHERE CouponTitle = @CouponTitle)
+        BEGIN
+            PRINT 'Lỗi: Tiêu đề mã giảm giá đã tồn tại.'
+            RAISERROR('Tiêu đề mã giảm giá đã tồn tại.', 16, 1)
+            RETURN
+        END
+
+        --nếu type = giá trị thì max discount phải <= value
+        IF @CouponType = 'fixed' AND @CouponMaxDiscount > @CouponValue
+        BEGIN
+            PRINT 'Lỗi: Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.'
+            RAISERROR('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.', 16, 1)
+            RETURN
+        END
+
+        -- Insert with transaction
+        BEGIN TRANSACTION
+            INSERT INTO Coupon (
+                CouponTitle,
+                CouponValue,
+                CouponType,
+                CouponStartDate,
+                CouponExpire,
+                CouponMaxDiscount
+            )
+            VALUES (
+                @CouponTitle,
+                @CouponValue,
+                @CouponType,
+                @CouponStartDate,
+                @CouponExpire,
+                @CouponMaxDiscount
+            )
+        COMMIT TRANSACTION
+
+        PRINT 'Thêm mã giảm giá thành công.'
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION
+
+
+
+        -- PRINT 'Lỗi: ' + ERROR_MESSAGE()
+        SET @ErrorMessage = ERROR_MESSAGE()
+        PRINT @ErrorMessage
+        RETURN
+    END CATCH
+END
+GO
+
+--UPDATE COUPON
+CREATE PROCEDURE UpdateCoupon
+    @CouponID VARCHAR(20),
+    @CouponTitle NVARCHAR(255),
+    @CouponValue INT,
+    @CouponType VARCHAR(255),
+    @CouponStartDate DATE,
+    @CouponExpire DATE,
+    @CouponMaxDiscount DECIMAL(10,2),
+    @ErrorMessage NVARCHAR(255) OUTPUT
+AS
+BEGIN
+    BEGIN TRY
+
+
+        -- Validate input
+
+        IF @CouponStartDate < GETDATE()
+        BEGIN
+            RAISERROR('Ngày bắt đầu không được trong quá khứ', 16, 1)
+            RETURN
+        END
+
+        IF @CouponStartDate > @CouponExpire
+        BEGIN
+            RAISERROR('Ngày bắt đầu không được lớn hơn ngày kết thúc', 16, 1)
+            RETURN
+        END
+
+
+
+        IF @CouponMaxDiscount <= 0
+        BEGIN
+            RAISERROR('Giá trị giảm giá phải lớn hơn 0', 16, 1)
+            RETURN
+        END
+
+
+
+        --Validate coupon type
+        IF @CouponType NOT IN ('percent', 'fixed')
+        BEGIN
+            RAISERROR('Loại mã giảm giá không hợp lệ', 16, 1)
+            RETURN
+        END
+
+        --Validate coupon percentage range
+        IF @CouponType = 'percent' AND (@CouponValue <= 0 OR @CouponValue > 100)
+        BEGIN
+            RAISERROR('Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100', 16, 1)
+            RETURN
+        END
+
+        --Validate coupon value
+        IF @CouponType = 'fixed' AND @CouponValue <= 0
+        BEGIN
+            RAISERROR('Giá trị giảm giá phải lớn hơn 0', 16, 1)
+            RETURN
+        END
+
+        --Validate max discount
+        IF @CouponType = 'fixed' AND @CouponMaxDiscount > @CouponValue
+        BEGIN
+            RAISERROR('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá', 16, 1)
+            RETURN
+        END
+
+        --check if coupon exists
+        IF NOT EXISTS (SELECT 1 FROM Coupon WHERE CouponID = @CouponID)
+        BEGIN
+            RAISERROR(N'Không tìm thấy mã giảm giá', 16, 1)
+            RETURN
+        END
+
+
+
+
+        BEGIN TRANSACTION
+            UPDATE Coupon
+            SET
+                CouponTitle = @CouponTitle,
+                CouponValue = @CouponValue,
+                CouponType = @CouponType,
+                CouponStartDate = @CouponStartDate,
+                CouponExpire = @CouponExpire,
+                CouponMaxDiscount = @CouponMaxDiscount
+            WHERE CouponID = @CouponID
+
+            IF @@ROWCOUNT = 0
+            BEGIN
+                RAISERROR('Không tìm thấy mã giảm giá', 16, 1)
+                ROLLBACK TRANSACTION
+                RETURN
+            END
+
+        COMMIT TRANSACTION
+        PRINT 'Cập nhật mã giảm giá thành công.'
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION
+
+        PRINT 'Lỗi: ' + ERROR_MESSAGE()
+        SET @ErrorMessage = ERROR_MESSAGE()
+        RETURN
+    END CATCH
+END
+GO
+
+
+
+--DELETE COUPON
+CREATE PROCEDURE DeleteCoupon
+    @CouponID VARCHAR(20)
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION
+            -- Check if coupon exists
+            IF NOT EXISTS (SELECT 1 FROM Coupon WHERE CouponID = @CouponID)
+            BEGIN
+                RAISERROR('Không tìm thấy mã giảm giá', 16, 1)
+                RETURN
+            END
+
+
+            --DELETE Edit
+            DELETE FROM Edit
+            WHERE EditCouponID = @CouponID
+
+
+            -- Delete the coupon
+            DELETE FROM Coupon
+            WHERE CouponID = @CouponID
+
+            IF @@ROWCOUNT > 0
+                PRINT 'Xóa mã giảm giá thành công.'
+            ELSE
+                RAISERROR('Không thể xóa mã giảm giá', 16, 1)
+
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION
+
+        PRINT 'Lỗi: ' + ERROR_MESSAGE()
+    END CATCH
+END
+GO
+
+-- Ví dụ sử dụng các stored procedure
+
+-- Thêm mã giảm giá
+SELECT * FROM Coupon;
+DECLARE @ErrorMessage NVARCHAR(255);
+EXEC InsertCoupon 'SUMMER2021', 20, 'percent', '2025-06-01', '2026-08-31', 100, @ErrorMessage OUTPUT;
+
+SELECT * FROM Coupon;
+
+-- Cập nhật mã giảm giá
+DECLARE @ErrorMessage3 NVARCHAR(255);
+EXEC UpdateCoupon '1', 'SUMMER2022', 25, 'percent', '2025-06-01', '2026-08-31', 100, @ErrorMessage3 OUTPUT;
+
+SELECT * FROM Coupon;
+
+-- Xóa mã giảm giá
+EXEC DeleteCoupon '1';
+
+SELECT * FROM Coupon;
 
 
 
