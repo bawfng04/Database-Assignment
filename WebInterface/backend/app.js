@@ -15,26 +15,6 @@ app.get("/", (req, res) => {
   res.render("index", { dbName });
 });
 
-// app.get("/courses", async (req, res) => {
-//   const search = req.query.search || "";
-//   const sort = req.query.sort || "CourseID";
-//   try {
-//     const pool = await poolPromise;
-//     const query = `
-//       SELECT * FROM Course
-//       WHERE CourseName LIKE @search
-//       ORDER BY ${sort}
-//     `;
-//     const result = await pool
-//       .request()
-//       .input("search", sql.NVarChar, `%${search}%`)
-//       .query(query);
-//     res.render("courses", { courses: result.recordset, search, sort });
-//   } catch (err) {
-//     console.error("Error fetching data:", err);
-//     res.status(500).send("Error fetching data from database.");
-//   }
-// });
 app.get("/courses", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "CourseID";
@@ -42,11 +22,11 @@ app.get("/courses", async (req, res) => {
   const minRating = req.query.minRating || "";
 
   try {
-    const pool = await poolPromise;
+    const pool = await poolPromise; // tạo pool để thực hiện các truy vấn
     let query;
     let result;
 
-    if (search && sort) {
+    if (search && sort) { // nếu có search và sort thì thực hiện truy vấn
       query = `
         SELECT c.*, cat.CategoryName
         FROM Course c
@@ -199,21 +179,29 @@ app.get("/category", async (req, res) => {
 //   }
 // });
 
-app.get("/student", async (req, res) => {
+app.get("/coursestudent", async (req, res) => {
   const search = req.query.search || "";
-  const sort = req.query.sort || "StudentID";
+  const sort = req.query.sort || "CourseID";
   try {
     const pool = await poolPromise;
     const query = `
-      SELECT * FROM Student
-      WHERE StudentID LIKE @search
+      SELECT cs.CourseID, c.CourseName, cs.StudentID, u.UserName AS StudentName
+      FROM CourseStudent cs
+      JOIN Course c ON cs.CourseID = c.CourseID
+      JOIN Student s ON cs.StudentID = s.StudentID
+      JOIN Users u ON s.StudentID = u.UsernameID
+      WHERE cs.CourseID LIKE @search
       ORDER BY ${sort}
     `;
     const result = await pool
       .request()
       .input("search", sql.NVarChar, `%${search}%`)
       .query(query);
-    res.render("student", { student: result.recordset, search, sort });
+    res.render("coursestudent", {
+      courseStudent: result.recordset,
+      search,
+      sort,
+    });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
@@ -591,5 +579,26 @@ app.listen(PORT, () =>
 //   } catch (err) {
 //     console.error("Error deleting coupon:", err);
 //     res.status(500).send("Error deleting coupon.");
+//   }
+// });
+
+// app.get("/courses", async (req, res) => {
+//   const search = req.query.search || "";
+//   const sort = req.query.sort || "CourseID";
+//   try {
+//     const pool = await poolPromise;
+//     const query = `
+//       SELECT * FROM Course
+//       WHERE CourseName LIKE @search
+//       ORDER BY ${sort}
+//     `;
+//     const result = await pool
+//       .request()
+//       .input("search", sql.NVarChar, `%${search}%`)
+//       .query(query);
+//     res.render("courses", { courses: result.recordset, search, sort });
+//   } catch (err) {
+//     console.error("Error fetching data:", err);
+//     res.status(500).send("Error fetching data from database.");
 //   }
 // });

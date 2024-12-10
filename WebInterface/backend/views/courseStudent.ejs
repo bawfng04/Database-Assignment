@@ -23,10 +23,9 @@
     <thead>
       <tr>
         <th>CourseID</th>
+        <th>Course Name</th>
         <th>StudentID</th>
-        <th>CourseProgress</th>
-        <th>ReviewScore</th>
-        <th>ReviewContent</th>
+        <th>Student Name</th>
         <!-- Add more columns if needed -->
       </tr>
     </thead>
@@ -34,10 +33,9 @@
       <% courseStudent.forEach(cs => { %>
         <tr>
           <td><%= cs.CourseID %></td>
+          <td><%= cs.CourseName %></td>
           <td><%= cs.StudentID %></td>
-          <td><%= cs.CourseProgress %></td>
-          <td><%= cs.ReviewScore %></td>
-          <td><%= cs.ReviewContent %></td>
+          <td><%= cs.StudentName %></td>
           <!-- Add more columns if needed -->
         </tr>
       <% }) %>
