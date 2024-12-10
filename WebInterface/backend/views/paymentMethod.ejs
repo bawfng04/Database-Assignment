@@ -12,7 +12,7 @@
     <input type="text" name="search" placeholder="Search by Payment Code" value="<%= search %>">
     <select name="sort" onchange="document.getElementById('sortForm').submit()">
       <option value="PaymentCode" <%= sort === 'PaymentCode' ? 'selected' : '' %>>Payment Code</option>
-      <option value="PaymentAmount" <%= sort === 'PaymentAmount' ? 'selected' : '' %>>Payment Amount</option>
+      <option value="PayerName" <%= sort === 'PayerName' ? 'selected' : '' %>>Payment Amount</option>
       <option value="PaymentDate" <%= sort === 'PaymentDate' ? 'selected' : '' %>>Payment Date</option>
       <!-- Add more sort options if needed -->
     </select>
@@ -22,7 +22,7 @@
     <thead>
       <tr>
         <th>PaymentCode</th>
-        <th>PaymentAmount</th>
+        <th>PayerName</th>
         <th>PaymentDate</th>
         <!-- Add more columns if needed -->
       </tr>
@@ -31,7 +31,7 @@
       <% paymentMethods.forEach(payment => { %>
         <tr>
           <td><%= payment.PaymentCode %></td>
-          <td><%= payment.PaymentAmount %></td>
+          <td><%= payment.PayerName %></td>
           <td><%= payment.PaymentDate %></td>
           <!-- Add more columns if needed -->
         </tr>
