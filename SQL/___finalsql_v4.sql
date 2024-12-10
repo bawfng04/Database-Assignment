@@ -2180,3 +2180,33 @@ PRINT 'Average Test Score: ' + CAST(@AvgScore AS NVARCHAR);
 
 
 
+
+
+-- SELECT ALL DATABASE TABLES
+SELECT * FROM sys.tables;
+
+SELECT * FROM CourseOrder
+SELECT * FROM Review
+SELECT * FROM Users
+SELECT * FROM Admin
+SELECT * FROM Teacher
+SELECT * FROM Category
+SELECT * FROM Course
+SELECT * FROM Chapter
+SELECT * FROM Document
+SELECT * FROM Lesson
+SELECT * FROM Exercise
+SELECT * FROM Test
+SELECT * FROM Question
+SELECT * FROM Options
+SELECT * FROM QuestionTest
+SELECT * FROM Guardian
+SELECT * FROM TeacherCourse
+SELECT * FROM Coupon
+SELECT * FROM Edit
+SELECT * FROM CourseStudent
+SELECT * FROM PaymentMethod
+SELECT * FROM Orders
+SELECT * FROM Momo
+SELECT * FROM VISA
+SELECT * FROM InternetBanking
