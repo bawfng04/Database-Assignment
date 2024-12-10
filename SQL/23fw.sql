@@ -1,4 +1,4 @@
---Function 1: Tìm kiếm và hiển thị thông tin các khóa học trong một danh mục cụ thể,
+--Procedure 1: Tìm kiếm và hiển thị thông tin các khóa học trong một danh mục cụ thể,
 --có điểm đánh giá trung bình cao hơn hoặc bằng một mức điểm cho trước
 GO
 CREATE PROCEDURE GetCoursesInCategoryByMinRating
@@ -47,9 +47,7 @@ END;
 EXEC GetCoursesInCategoryByMinRating @CategoryName = N'Lập trình', @MinRating = 4.0
 
 
-
-
---Function 2: lấy danh sách các mã giảm giá còn hiệu lực tại một thời điểm cụ thể,
+--Procedure 1: lấy danh sách các mã giảm giá còn hiệu lực tại một thời điểm cụ thể,
 --kèm theo thống kê số lượng đơn hàng đã sử dụng mã giảm giá đó.
 
 GO
