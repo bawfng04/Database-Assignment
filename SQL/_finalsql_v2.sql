@@ -1,7 +1,7 @@
 
------------------------------ TẠO DATABASE --------------------------------
 
---Người dùng hệ thống
+
+-------------------------------- CREATE DATABASE --------------------------------
 CREATE TABLE Users(
     UsernameID INT IDENTITY (1,1) PRIMARY KEY,
     UserEmail NVARCHAR(255),
@@ -28,14 +28,16 @@ CREATE TABLE Teacher(
 
 --Bảng danh mục
 CREATE TABLE Category(
-    CategoryID INT IDENTITY (1,1) PRIMARY KEY,
+    CategoryID INT PRIMARY KEY,
     CategoryName NVARCHAR(255),
     CategoryDescription NVARCHAR(255),
 );
 
+
+
 --Bảng khoá học
 CREATE TABLE Course(
-    CourseID INT IDENTITY (1,1) PRIMARY KEY,
+    CourseID INT PRIMARY KEY,
     CourseName NVARCHAR(255),
     CourseStatus NVARCHAR(255),
     CourseDescription NVARCHAR(255),
@@ -43,11 +45,12 @@ CREATE TABLE Course(
     CourseImage NVARCHAR(255),
     CourseStartDate DATE,
     CourseEndDate DATE,
-	CourseAverageRating FLOAT,
+	CourseAverageRating DECIMAL(10,3),
     CategoryID INT,
 
     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
 );
+
 
 --Chương
 CREATE TABLE Chapter(
@@ -197,6 +200,7 @@ CREATE TABLE Coupon(
     CouponMaxDiscount INT,
 )
 
+
 --Bảng Chỉnh sửa
 CREATE TABLE Edit (
     EditID INT IDENTITY (1,1) PRIMARY KEY,
@@ -211,6 +215,8 @@ CREATE TABLE Edit (
     FOREIGN KEY (EditCouponID) REFERENCES Coupon(CouponID),
 );
 
+
+
 --Khoá học có học viên
 CREATE TABLE CourseStudent(
     CourseID INT,
@@ -220,6 +226,9 @@ CREATE TABLE CourseStudent(
     FOREIGN KEY (CourseID) REFERENCES Course(CourseID),
     FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
 )
+
+
+
 
 --Phương thức thanh toán
 CREATE TABLE PaymentMethod(
@@ -253,15 +262,16 @@ CREATE TABLE VISA(
     FOREIGN KEY (PaymentCode) REFERENCES PaymentMethod(PaymentCode),
 )
 
+
 --Đơn hàng
 CREATE TABLE Orders(
-    OrderID INT IDENTITY (1,1) PRIMARY KEY,
+    OrderID INT PRIMARY KEY,
     OrderPaymentStatus NVARCHAR(255),
     OrderDate DATE,
     OrderPaymentCode NVARCHAR(255),
     StudentID INT,
+	TotalAmount DECIMAL(10,2),
     CouponID INT,
-
     FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
     FOREIGN KEY (OrderPaymentCode) REFERENCES PaymentMethod(PaymentCode),
     FOREIGN KEY (CouponID) REFERENCES Coupon(CouponID),
@@ -292,273 +302,31 @@ CREATE TABLE Review(
 
 
 
---------------- TRIGGER để check trước khi insert dữ liệu ----------------
--- Trigger khi insert dữ liệu vào bảng Users
-GO
-CREATE TRIGGER trg_Users_Insert
-ON Users
-INSTEAD OF INSERT
-AS
-BEGIN
-    DECLARE @UserEmail NVARCHAR(255), @UserPhone VARCHAR(10);
-
-    SELECT @UserEmail = UserEmail, @UserPhone = UserPhone
-    FROM inserted;
-
-    -- Validate UserEmail
-    IF @UserEmail IS NULL OR @UserEmail NOT LIKE '%_@__%.__%'
-    BEGIN
-        RAISERROR ('Invalid email format', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate UserPhone
-    IF LEN(@UserPhone) <> 10 OR @UserPhone NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
-    BEGIN
-        RAISERROR ('Invalid phone number', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate unique UserEmail
-    IF EXISTS (SELECT 1 FROM Users WHERE UserEmail = @UserEmail)
-    BEGIN
-        RAISERROR ('UserEmail must be unique', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate unique UserPhone
-    IF EXISTS (SELECT 1 FROM Users WHERE UserPhone = @UserPhone)
-    BEGIN
-        RAISERROR ('UserPhone must be unique', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- nếu không có lỗi thì insert dữ liệu
-    INSERT INTO Users (UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username)
-    SELECT UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username
-    FROM inserted;
-END;
-
-
---trigger cho bảng teacher
-GO
-CREATE TRIGGER trg_Teacher_Insert
-ON Teacher
-INSTEAD OF INSERT
-AS
-BEGIN
-    DECLARE @TeacherDescription NVARCHAR(255);
-
-    SELECT @TeacherDescription = TeacherDescription
-    FROM inserted;
-
-    -- Validate TeacherDescription
-    IF @TeacherDescription IS NULL
-    BEGIN
-        RAISERROR ('TeacherDescription cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- nếu không có lỗi thì insert dữ liệu
-    INSERT INTO Teacher (TeacherID, TeacherDescription)
-    SELECT TeacherID, TeacherDescription
-    FROM inserted;
-END;
-
-
--- Trigger khi insert dữ liệu vào bảng Admin
-GO
-CREATE TRIGGER trg_Admin_Insert
-ON Admin
-INSTEAD OF INSERT
-AS
-BEGIN
-    DECLARE @AdminID INT;
-
-    SELECT @AdminID = AdminID
-    FROM inserted;
-
-    -- Validate AdminID exists in Users table
-    IF NOT EXISTS (SELECT 1 FROM Users WHERE UsernameID = @AdminID)
-    BEGIN
-        RAISERROR ('AdminID does not exist in Users table', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- If validation passes, insert the data
-    INSERT INTO Admin (AdminID)
-    SELECT AdminID
-    FROM inserted;
-END;
-
-
--- Trigger khi insert dữ liệu vào bảng Student
-GO
-CREATE TRIGGER trg_Student_Insert
-ON Student
-INSTEAD OF INSERT
-AS
-BEGIN
-    DECLARE @OptionName NVARCHAR(255), @QuestionID INT, @StudentID INT;
-
-    SELECT @OptionName = OptionName, @QuestionID = QuestionID, @StudentID = StudentID
-    FROM inserted;
-
-    -- Validate OptionName
-    IF @OptionName IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Options WHERE OptionName = @OptionName)
-    BEGIN
-        RAISERROR ('OptionName does not exist in Options table', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate QuestionID
-    IF @QuestionID IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Question WHERE QuestionID = @QuestionID)
-    BEGIN
-        RAISERROR ('QuestionID does not exist in Question table', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- If validation passes, insert the data
-    INSERT INTO Student (StudentID, OptionName, QuestionID)
-    SELECT StudentID, OptionName, QuestionID
-    FROM inserted;
-END;
-GO
-
-
--- Trigger khi insert dữ liệu vào bảng Category
-GO
-CREATE TRIGGER trg_Category_Insert
-ON Category
-INSTEAD OF INSERT
-AS
-BEGIN
-    DECLARE @CategoryName NVARCHAR(255), @CategoryDescription NVARCHAR(255);
-
-    SELECT @CategoryName = CategoryName, @CategoryDescription = CategoryDescription
-    FROM inserted;
-
-    -- Validate CategoryName
-    IF @CategoryName IS NULL
-    BEGIN
-        RAISERROR ('CategoryName cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CategoryDescription
-    IF @CategoryDescription IS NULL
-    BEGIN
-        RAISERROR ('CategoryDescription cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- If validation passes, insert the data
-    INSERT INTO Category (CategoryName, CategoryDescription)
-    SELECT CategoryName, CategoryDescription
-    FROM inserted;
-END;
-
--- Trigger khi insert dữ liệu vào bảng Course
-GO
-CREATE TRIGGER trg_Course_Insert
-ON Course
-INSTEAD OF INSERT
-AS
-BEGIN
-    DECLARE @CourseName NVARCHAR(255), @CourseStatus NVARCHAR(255), @CourseDescription NVARCHAR(255),
-            @CoursePrice INT, @CourseImage NVARCHAR(255), @CourseStartDate DATE, @CourseEndDate DATE,
-            @CategoryID INT;
-
-    SELECT @CourseName = CourseName, @CourseStatus = CourseStatus, @CourseDescription = CourseDescription,
-            @CoursePrice = CoursePrice, @CourseImage = CourseImage, @CourseStartDate = CourseStartDate,
-            @CourseEndDate = CourseEndDate, @CategoryID = CategoryID
-    FROM inserted;
-
-    -- Validate CourseName
-    IF @CourseName IS NULL
-    BEGIN
-        RAISERROR ('CourseName cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CourseStatus
-    IF @CourseStatus IS NULL
-    BEGIN
-        RAISERROR ('CourseStatus cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CourseDescription
-    IF @CourseDescription IS NULL
-    BEGIN
-        RAISERROR ('CourseDescription cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CoursePrice
-    IF @CoursePrice IS NULL
-    BEGIN
-        RAISERROR ('CoursePrice cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CourseImage
-    IF @CourseImage IS NULL
-    BEGIN
-        RAISERROR ('CourseImage cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CourseStartDate
-    IF @CourseStartDate IS NULL
-    BEGIN
-        RAISERROR ('CourseStartDate cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CourseEndDate
-    IF @CourseEndDate IS NULL
-    BEGIN
-        RAISERROR ('CourseEndDate cannot be null', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-
-    -- Validate CategoryID
-    IF NOT EXISTS (SELECT 1 FROM Category WHERE CategoryID = @CategoryID)
-    BEGIN
-        RAISERROR ('CategoryID does not exist in Category table', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-
-    END
-
-
-    -- If validation passes, insert the data
-    INSERT INTO Course (CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID)
-    SELECT CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID
-    FROM inserted;
-END;
 
 
 
----------------------------------------- Dữ liệu mẫu ----------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------- INSERT ---------------------------
 
 -- Insert Users
 INSERT INTO Users (UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username) VALUES
@@ -590,27 +358,48 @@ INSERT INTO Users (UserEmail, UserPhone, UserPassword, UserAddress, UserImage, U
 
 -- Insert Admin
 INSERT INTO Admin (AdminID) VALUES (1), (2);
-
 -- Insert Teacher
 INSERT INTO Teacher (TeacherID, TeacherDescription) VALUES
 (3, N'Chuyên gia lập trình với 10 năm kinh nghiệm'),
 (4, N'Thạc sĩ Khoa học máy tính'),
 (5, N'Tiến sĩ An toàn thông tin'),
 (6, N'Chuyên gia về AI và Machine Learning');
-
 -- Insert Category
-INSERT INTO Category (CategoryName, CategoryDescription) VALUES
-(N'Lập trình web', N'Các khóa học về phát triển web'),
-(N'Lập trình mobile', N'Các khóa học về phát triển ứng dụng di động'),
-(N'Cơ sở dữ liệu', N'Các khóa học về quản trị và thiết kế database'),
-(N'AI và Machine Learning', N'Các khóa học về trí tuệ nhân tạo');
+INSERT INTO Category (CategoryID,CategoryName, CategoryDescription) VALUES
+(1,N'Lập trình web', N'Các khóa học về phát triển web'),
+(2,N'Lập trình mobile', N'Các khóa học về phát triển ứng dụng di động'),
+(3,N'Cơ sở dữ liệu', N'Các khóa học về quản trị và thiết kế database'),
+(4,N'AI và Machine Learning', N'Các khóa học về trí tuệ nhân tạo');
 
 -- Insert Course
-INSERT INTO Course (CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID) VALUES
-(N'Lập trình Web với React', 'active', N'Khóa học toàn diện về React', 2000000, '/images/react.jpg', '2024-01-01', '2024-06-30', 1),
-(N'Android Development', 'active', N'Phát triển ứng dụng Android', 2500000, '/images/android.jpg', '2024-01-15', '2024-07-15', 2),
-(N'SQL Master', 'active', N'Làm chủ SQL Server', 1800000, '/images/sql.jpg', '2024-02-01', '2024-05-31', 3),
-(N'Machine Learning Cơ bản', 'active', N'Nhập môn ML', 3000000, '/images/ml.jpg', '2024-02-15', '2024-08-15', 4);
+INSERT INTO Course (CourseID,CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID) VALUES
+-- Category 1: Lập trình web (Thêm 7 khóa)
+(1,N'Lập trình Web với React', 'active', N'Khóa học toàn diện về React', 2000000, '/images/react.jpg', '2024-01-01', '2024-06-30', 1),
+(2,N'Lập trình Web với Angular', 'active', N'Phát triển ứng dụng web với Angular', 2200000, '/images/angular.jpg', '2024-01-01', '2024-06-30', 1),
+(3,N'Node.js Backend Development', 'active', N'Xây dựng backend với Node.js', 2300000, '/images/nodejs.jpg', '2024-02-01', '2024-07-31', 1),
+(4,N'PHP & Laravel Framework', 'active', N'Phát triển web với PHP và Laravel', 1900000, '/images/laravel.jpg', '2024-03-01', '2024-08-31', 1),
+(5,N'Vue.js Frontend Development', 'active', N'Xây dựng giao diện với Vue.js', 2100000, '/images/vuejs.jpg', '2024-04-01', '2024-09-30', 1),
+(6,N'Lập trình Web với HTML', 'active', N'Khóa học toàn diện về HTML', 2000000, '/images/react.jpg', '2024-01-01', '2024-06-30', 1),
+(7,N'Lập trình Web với Bootstrap', 'active', N'Khóa học toàn diện về Bootstrap', 1500000, '/images/react.jpg', '2024-01-01', '2024-06-30', 1),
+-- Category 2: Lập trình mobile (Thêm 4 khóa)
+(8,N'iOS Development với Swift', 'active', N'Phát triển ứng dụng iOS', 2600000, '/images/swift.jpg', '2024-01-15', '2024-07-15', 2),
+(9,N'React Native', 'active', N'Phát triển ứng dụng đa nền tảng với React Native', 2400000, '/images/react-native.jpg', '2024-02-15', '2024-08-15', 2),
+(10,N'Flutter Development', 'active', N'Xây dựng ứng dụng mobile với Flutter', 2300000, '/images/flutter.jpg', '2024-03-15', '2024-09-15', 2),
+(11,N'Kotlin for Android', 'active', N'Lập trình Android với Kotlin', 2200000, '/images/kotlin.jpg', '2024-04-15', '2024-10-15', 2),
+
+-- Category 3: Cơ sở dữ liệu (Thêm 4 khóa)
+(12,N'MongoDB Master', 'active', N'Làm chủ MongoDB', 1900000, '/images/mongodb.jpg', '2024-02-01', '2024-05-31', 3),
+(13,N'PostgreSQL Advanced', 'active', N'PostgreSQL nâng cao', 2000000, '/images/postgresql.jpg', '2024-03-01', '2024-06-30', 3),
+(14,N'MySQL Performance', 'active', N'Tối ưu hiệu suất MySQL', 1950000, '/images/mysql.jpg', '2024-04-01', '2024-07-31', 3),
+(15,N'Oracle Database', 'active', N'Quản trị Oracle Database', 2100000, '/images/oracle.jpg', '2024-05-01', '2024-08-31', 3),
+
+-- Category 4: AI và Machine Learning (Thêm 4 khóa)
+(16,N'Deep Learning Cơ bản', 'active', N'Nhập môn Deep Learning', 3200000, '/images/deep-learning.jpg', '2024-02-15', '2024-08-15', 4),
+(17,N'Computer Vision', 'active', N'Xử lý ảnh và thị giác máy tính', 3100000, '/images/cv.jpg', '2024-03-15', '2024-09-15', 4),
+(18,N'Natural Language Processing', 'active', N'Xử lý ngôn ngữ tự nhiên', 3300000, '/images/nlp.jpg', '2024-04-15', '2024-10-15', 4),
+(19,N'Data Science với Python', 'active', N'Khoa học dữ liệu với Python', 2900000, '/images/data-science.jpg', '2024-05-15', '2024-11-15', 4);
+
+
 
 -- Insert TeacherCourse
 INSERT INTO TeacherCourse (TeacherID, CourseID) VALUES
@@ -657,6 +446,8 @@ INSERT INTO InternetBanking (PaymentCode, BankName) VALUES
 -- Thêm dữ liệu cho VISA (1 giao dịch)
 INSERT INTO VISA (PaymentCode, CardNumber, ExpireDate) VALUES
 ('PAY005', '4111111111111111', '2025-12-31');  -- Của student 11
+
+
 -- Insert Coupon data
 INSERT INTO Coupon (CouponTitle, CouponValue, CouponType, CouponStartDate, CouponExpire, CouponMaxDiscount) VALUES
 -- Giảm theo phần trăm
@@ -666,32 +457,55 @@ INSERT INTO Coupon (CouponTitle, CouponValue, CouponType, CouponStartDate, Coupo
 (N'Giảm 300k khóa học đầu tiên', 300000, N'Giá trị', '2024-01-15', '2024-03-15', 300000),
 (N'Giảm 500k khóa học nâng cao', 500000, N'Giá trị', '2024-02-15', '2024-05-15', 500000);
 
--- Insert Orders
-INSERT INTO Orders (OrderPaymentStatus, OrderDate, OrderPaymentCode, StudentID) VALUES
-('paid', '2024-01-05', 'PAY001', 7), --đơn 1 của student 7
-('paid', '2024-01-10', 'PAY002', 8), --đơn 2 của student 8
-('paid', '2024-01-15', 'PAY003', 9),--đơn 3 của student 9
-('paid', '2024-01-20', 'PAY004', 10),--đơn 4 của student 10
-('paid', '2024-01-25', 'PAY005', 11), -- đơn 5 của student 11
-('unpaid', '2024-02-01', NULL, 12),  -- đơn 6 học sinh 12
-('unpaid', '2024-02-05', NULL, 13),  --đơn 7 học sinh 13
-('unpaid', '2024-02-10', NULL, 14),  -- đơn 8 học sinh 14
-('unpaid', '2024-02-15', NULL, 15),  -- đơn 9 học sinh 15
-('unpaid', '2024-02-20', NULL, 16);  -- đơn 10 học sinh 16
 
--- Insert CourseOrder
+-- Insert Orders
+INSERT INTO Orders (OrderID,OrderPaymentStatus, OrderDate, OrderPaymentCode, StudentID,TotalAmount,CouponID) VALUES
+(1,'paid', '2024-01-05', 'PAY001', 7,4500000,NULL), --đơn 1 của student 7 (4,5 TRIEU)
+(2,'paid', '2024-01-10', 'PAY002', 8,3800000,NULL), --đơn 2 của student 8 (3,8 trieu)
+(3,'paid', '2024-01-15', 'PAY003', 9,5500000,NULL),--đơn 3 của student 9 (5,5 trieu)
+(4,'paid', '2024-01-20', 'PAY004', 10,1800000,NULL),--đơn 4 của student 10  (1,8 trieu)
+(5,'paid', '2024-01-25', 'PAY005', 11,3000000,NULL), -- đơn 5 của student 11 (3 trieu)
+(6,'unpaid', '2024-02-01', NULL, 12,9300000,NULL),  -- đơn 6 học sinh 12 (9.3 trieu)
+(7,'unpaid', '2024-02-05', NULL, 13,NULL,NULL),  --đơn 7 học sinh 13
+(8,'unpaid', '2024-02-10', NULL, 14,NULL,NULL),  -- đơn 8 học sinh 14
+(9,'unpaid', '2024-02-15', NULL, 15,NULL,NULL),  -- đơn 9 học sinh 15
+(10,'unpaid', '2024-02-20', NULL, 16,NULL,NULL),  -- đơn 10 học sinh 16
+(11, 'unpaid', '2024-10-12',NULL,17,NULL, NULL), -- đơn 11 học sinh 17
+(12, 'unpaid', '2024-10-12',NULL,18,NULL, NULL); -- đơn 12 học sinh 18
+
+--COUSRE 1 => 2 TRIEU
+--COURSE 2=> 2,5 TRIEU
+--COURSE3 =>1,8 TRIEU
+--COURSE 4=> 3 TRIEU
+--test trigger 1
+--INSERT INTO Orders (OrderID,OrderPaymentStatus, OrderDate, OrderPaymentCode, StudentID,TotalAmount,CouponID) VALUES
+--(11,'unpaid', '2024-10-12',NULL,17,4000000,1);
+--SELECT * FROM Orders
+--WHERE OrderID=11
+--test trigger 1
+
 INSERT INTO CourseOrder (CourseID, OrderID) VALUES
+(1,11), --đơn 11 test trigger 1
+(2,12), --đơn 11 test trigger 1
+
 (1, 1), --đơn 1 course 1
 (2, 1), -- đơn 1 course 2
+
 (1, 2), -- đơn 2 course 1
 (3, 2), -- đơn 2 course 3
+
 (2, 3), -- đơn 3 course 2
 (4, 3), -- đơn  3 course 4
+
 (3, 4), -- đơn 4 course 3
+
 (4, 5), -- đơn 5 course 4
 
 (1, 6),  -- đơn 6 student 12 đăng ký course 1 (React)
+(2, 6),  -- đơn 6 student 12 đăng ký course 3 (SQL)
 (3, 6),  -- đơn 6 student 12 đăng ký course 3 (SQL)
+(4, 6),  -- đơn 6 student 12 đăng ký course 3 (SQL)
+
 (2, 7),  -- đơn 7 student 13 đăng ký course 2 (Android)
 (4, 8),  -- đơn 8 student 14 đăng ký course 4 (ML)
 (1, 9),  -- đơn 9 student 15 đăng ký course 1 (React)
@@ -699,6 +513,9 @@ INSERT INTO CourseOrder (CourseID, OrderID) VALUES
 (4, 10); -- đơn 10 student 16 đăng ký course 4 (ML)
 
 -- Insert CourseStudent (matching with Orders)
+--INSERT INTO CourseOrder (CourseID, OrderID) VALUES
+--(3,1)
+
 INSERT INTO CourseStudent (CourseID, StudentID) VALUES
 (1, 7),  --student 7 có course 1
 (2, 7),--student 7 có course 2
@@ -710,22 +527,156 @@ INSERT INTO CourseStudent (CourseID, StudentID) VALUES
 (4, 11);--student 11 course 4
 
 
+
+
 INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
 -- Course 1 (React) - ReviewID phải khác nhau trong cùng CourseID
-(1, 1, 5, N'Khóa học ReactJS rất hay và dễ hiểu', 7),        -- Student 7 review course 1 (React)
-(2, 1, 5, N'Tuyệt vời, đã học được nhiều điều mới về React', 8),  -- Student 8 review course 1 (React)
+(1, 1, 2, N'Khóa học React cực kỳ chất lượng, giảng viên nhiệt tình', 7),
+(2, 1, 3, N'Tài liệu đầy đủ, dễ hiểu, rất phù hợp cho người mới bắt đầu', 8),
+(3, 1, 2, N'Học được rất nhiều kiến thức thực tế về React', 9),
+(4, 1, 5, N'Giảng viên giải thích rất rõ ràng, có nhiều ví dụ thực tế', 10),
+(5, 1, 1, N'Khóa học giúp tôi tự tin làm việc với React', 11),
 
--- Course 2 (Android)
-(1, 2, 4, N'Giảng viên Android nhiệt tình, tài liệu đầy đủ', 7), -- Student 7 review course 2 (Android)
-(2, 2, 5, N'Rất hài lòng với khóa học Android này', 9),          -- Student 9 review course 2 (Android)
+--Course 2
+(1, 2, 1, N'Khóa học Angular rất chi tiết và chuyên sâu', 12),
+(2, 2, 2, N'Nội dung được cập nhật theo phiên bản mới nhất của Angular', 13),
+(3, 2, 1, N'Rất hài lòng với chất lượng giảng dạy', 14),
+(4, 2, 3, N'Bài tập thực hành giúp hiểu sâu về Angular', 15),
+(5, 2, 4, N'Giảng viên rất tận tâm, support nhiệt tình', 16),
 
 -- Course 3 (SQL)
-(1, 3, 4, N'Khóa học SQL rất thực tế và hữu ích', 8),            -- Student 8 review course 3 (SQL)
-(2, 3, 5, N'Giảng viên SQL rất tâm huyết', 10),                 -- Student 10 review course 3 (SQL)
+(1, 3, 5, N'Khóa học Node.js rất thực tế và hữu ích', 7),
+(2, 3, 2, N'Được học cách xây dựng API một cách chuyên nghiệp', 8),
+(3, 3, 3, N'Tài liệu phong phú, nhiều ví dụ thực tế', 9),
+(4, 3, 1, N'Giảng viên có nhiều kinh nghiệm thực tế', 10),
+(5, 3, 2, N'Rất hài lòng với nội dung khóa học', 11),
 
 -- Course 4 (ML)
-(1, 4, 4, N'Nội dung ML phong phú và chất lượng', 9),           -- Student 9 review course 4 (ML)
-(2, 4, 5, N'Khóa học ML đáp ứng đúng nhu cầu', 11);            -- Student 11 review course 4 (ML)
+(1, 4, 5, N'Khóa học Laravel rất chất lượng', 12),
+(2, 4, 4, N'Được học từ cơ bản đến nâng cao về Laravel', 13),
+(3, 4, 5, N'Giảng viên hướng dẫn tận tình', 14),
+(4, 4, 4, N'Nội dung khóa học được cập nhật thường xuyên', 15),
+(5, 4, 5, N'Rất hữu ích cho công việc', 16);
+
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 5, 4, N'Vue.js được giảng dạy rất dễ hiểu', 7),
+(2, 5, 3, N'Khóa học giúp tôi nắm vững Vue.js', 8),
+(3, 5, 4, N'Tuyệt vời, đã hiểu rõ về Vue Composition API', 9),
+(4, 5, 3, N'Rất thích cách trình bày của giảng viên', 10),
+(5, 5, 3, N'Khóa học cập nhật những tính năng mới nhất của Vue', 11);
+
+-- Reviews for Course 6 (HTML)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 6, 3, N'Khóa học HTML cơ bản nhưng đầy đủ', 12),
+(2, 6, 4, N'Rất phù hợp cho người mới bắt đầu', 13),
+(3, 6, 4, N'Giảng viên giải thích rất rõ ràng', 14),
+(4, 6, 4, N'Nhiều ví dụ thực tế hữu ích', 15),
+(5, 6, 5, N'Tài liệu học tập phong phú', 16);
+
+-- Reviews for Course 7 (Bootstrap)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 7, 1, N'Học Bootstrap rất thú vị', 7),
+(2, 7, 2, N'Khóa học giúp tôi làm chủ Bootstrap', 8),
+(3, 7, 1, N'Rất nhiều project thực tế', 9),
+(4, 7, 1, N'Giảng viên hướng dẫn chi tiết', 10),
+(5, 7, 1, N'Tài liệu cập nhật với Bootstrap 5', 11);
+
+-- Reviews for Course 8 (iOS Development)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 8, 1, N'Khóa học iOS rất chuyên nghiệp', 12),
+(2, 8, 2, N'Được học Swift từ cơ bản đến nâng cao', 13),
+(3, 8, 3, N'Nhiều kinh nghiệm thực tế từ giảng viên', 14),
+(4, 8, 4, N'Tài liệu đầy đủ và chi tiết', 15),
+(5, 8, 5, N'Rất hài lòng với khóa học', 16);
+
+-- Reviews for Course 9 (React Native)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 9, 1, N'React Native được giảng dạy rất hay', 7),
+(2, 9, 1, N'Dễ hiểu và thực tế', 8),
+(3, 9, 3, N'Giảng viên nhiệt tình support', 9),
+(4, 9, 2, N'Học được nhiều kinh nghiệm thực tế', 10),
+(5, 9, 5, N'Khóa học rất đáng giá', 11);
+
+-- Reviews for Course 10 (Flutter)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 10, 5, N'Flutter được giảng dạy rất chuyên nghiệp', 12),
+(2, 10, 5, N'Tài liệu cập nhật với phiên bản mới nhất', 13),
+(3, 10, 4, N'Nhiều ví dụ thực tế hữu ích', 14),
+(4, 10, 5, N'Giảng viên có nhiều kinh nghiệm', 15),
+(5, 10, 4, N'Rất hài lòng với chất lượng', 16);
+
+-- Reviews for Course 11 (Kotlin)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 11, 1, N'Khóa học Kotlin rất chất lượng', 7),
+(2, 11, 4, N'Được học nhiều tính năng mới của Kotlin', 8),
+(3, 11, 2, N'Giảng viên giải thích rất rõ ràng', 9),
+(4, 11, 5, N'Tài liệu phong phú và cập nhật', 10),
+(5, 11, 5, N'Rất thích cách trình bày', 11);
+
+-- Reviews for Course 12 (MongoDB)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 12, 4, N'MongoDB được giảng dạy rất chi tiết', 12),
+(2, 12, 2, N'Hiểu rõ về NoSQL database', 13),
+(3, 12, 1, N'Nhiều bài tập thực hành', 14),
+(4, 12, 5, N'Giảng viên rất nhiệt tình', 15),
+(5, 12, 5, N'Khóa học rất hữu ích', 16);
+
+-- Reviews for Course 13 (PostgreSQL)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 13, 1, N'PostgreSQL được giảng dạy rất chuyên sâu', 7),
+(2, 13, 1, N'Nhiều kiến thức nâng cao hữu ích', 8),
+(3, 13, 2, N'Giảng viên có nhiều kinh nghiệm thực tế', 9),
+(4, 13, 2, N'Tài liệu đầy đủ và chi tiết', 10),
+(5, 13, 3, N'Rất hài lòng với khóa học', 11);
+
+-- Reviews for Course 14 (MySQL)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 14, 5, N'MySQL Performance được giảng dạy rất hay', 12),
+(2, 14, 5, N'Học được nhiều kỹ thuật tối ưu', 13),
+(3, 14, 5, N'Giảng viên chia sẻ nhiều kinh nghiệm', 14),
+(4, 14, 5, N'Nội dung khóa học rất thực tế', 15),
+(5, 14, 5, N'Đáng giá từng đồng', 16);
+
+-- Reviews for Course 15 (Oracle)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 15, 5, N'Oracle Database được giảng dạy rất chuyên nghiệp', 7),
+(2, 15, 4, N'Tài liệu đầy đủ và chi tiết', 8),
+(3, 15, 5, N'Giảng viên rất tận tâm', 9),
+(4, 15, 1, N'Nhiều bài tập thực hành hữu ích', 10),
+(5, 15, 2, N'Khóa học rất chất lượng', 11);
+
+-- Reviews for Course 16 (Deep Learning)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 16, 3, N'Deep Learning cơ bản được giảng dạy dễ hiểu', 12),
+(2, 16, 3, N'Giảng viên giải thích rõ ràng các khái niệm', 13),
+(3, 16, 3, N'Nhiều ví dụ thực tế', 14),
+(4, 16, 3, N'Tài liệu học tập phong phú', 15),
+(5, 16, 2, N'Rất hài lòng với khóa học', 16);
+
+-- Reviews for Course 17 (Computer Vision)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 17, 1, N'Computer Vision được giảng dạy rất hay', 7),
+(2, 17, 2, N'Nhiều project thực tế thú vị', 8),
+(3, 17, 1, N'Giảng viên có kiến thức sâu rộng', 9),
+(4, 17, 1, N'Tài liệu cập nhật với công nghệ mới', 10),
+(5, 17, 1, N'Khóa học rất đáng giá', 11);
+
+-- Reviews for Course 18 (NLP)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 18, 2, N'NLP được giảng dạy rất chuyên sâu', 12),
+(2, 18, 2, N'Được học các kỹ thuật xử lý ngôn ngữ hiện đại', 13),
+(3, 18, 2, N'Giảng viên nhiệt tình hỗ trợ', 14),
+(4, 18, 5, N'Nội dung khóa học rất thực tế', 15),
+(5, 18, 5, N'Rất hài lòng với chất lượng', 16);
+
+-- Reviews for Course 19 (Data Science)
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(1, 19, 1, N'Data Science với Python rất thực tế', 7),
+(2, 19, 5, N'Được học nhiều thư viện phân tích dữ liệu', 8),
+(3, 19, 5, N'Giảng viên có nhiều kinh nghiệm thực tế', 9),
+(4, 19, 5, N'Tài liệu đầy đủ và cập nhật', 10),
+(5, 19, 5, N'Khóa học rất chất lượng', 11);
+
 
 
 INSERT INTO Chapter (ChapterName, CourseID) VALUES
@@ -1188,86 +1139,90 @@ VALUES
 -- Student 7 - Course 2 (Android)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(7, 2, 1, N'Chương 1: Cơ bản về Android', 8),
-(7, 2, 2, N'Chương 1: Cơ bản về Android', 9),
-(7, 2, 1, N'Chương 2: Layout và UI', 7),
-(7, 2, 2, N'Chương 2: Layout và UI', 8),
-(7, 2, 1, N'Chương 3: Activities và Intents', 8),
-(7, 2, 2, N'Chương 3: Activities và Intents', 6),
-(7, 2, 1, N'Chương 4: Data Storage', 9),
-(7, 2, 2, N'Chương 4: Data Storage', 10);
+(7, 2, 1, N'Chương 1: Cơ bản về Android', 0),
+(7, 2, 2, N'Chương 1: Cơ bản về Android', 0),
+(7, 2, 1, N'Chương 2: Layout và UI', 0),
+(7, 2, 2, N'Chương 2: Layout và UI', 0),
+(7, 2, 1, N'Chương 3: Activities và Intents', 0),
+(7, 2, 2, N'Chương 3: Activities và Intents', 0),
+(7, 2, 1, N'Chương 4: Data Storage', 0),
+(7, 2, 2, N'Chương 4: Data Storage', 0);
 
 -- Student 8 - Course 1 (React)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(8, 1, 1, N'Chương 1: Giới thiệu về ReactJS', 2),
-(8, 1, 2, N'Chương 1: Giới thiệu về ReactJS', 7),
-(8, 1, 1, N'Chương 2: JSX và Components', 8),
-(8, 1, 2, N'Chương 2: JSX và Components', 5),
-(8, 1, 1, N'Chương 3: State và Props', 6),
-(8, 1, 2, N'Chương 3: State và Props', 8),
-(8, 1, 1, N'Chương 4: React Hooks', 5),
-(8, 1, 2, N'Chương 4: React Hooks', 6);
+(8, 1, 1, N'Chương 1: Giới thiệu về ReactJS', 0),
+(8, 1, 2, N'Chương 1: Giới thiệu về ReactJS', 0),
+(8, 1, 1, N'Chương 2: JSX và Components', 0),
+(8, 1, 2, N'Chương 2: JSX và Components', 0),
+(8, 1, 1, N'Chương 3: State và Props', 0),
+(8, 1, 2, N'Chương 3: State và Props', 0),
+(8, 1, 1, N'Chương 4: React Hooks', 0),
+(8, 1, 2, N'Chương 4: React Hooks', 0);
 
 -- Student 8 - Course 3 (SQL)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(8, 3, 1, N'Chương 1: Cơ sở về SQL', 5),
-(8, 3, 2, N'Chương 1: Cơ sở về SQL', 4),
-(8, 3, 1, N'Chương 2: Truy vấn cơ bản', 5),
-(8, 3, 2, N'Chương 2: Truy vấn cơ bản', 6),
-(8, 3, 1, N'Chương 3: Joins và Subqueries', 5),
-(8, 3, 2, N'Chương 3: Joins và Subqueries', 5),
-(8, 3, 1, N'Chương 4: Stored Procedures', 6),
-(8, 3, 2, N'Chương 4: Stored Procedures', 7);
+(8, 3, 1, N'Chương 1: Cơ sở về SQL', 0),
+(8, 3, 2, N'Chương 1: Cơ sở về SQL', 0),
+(8, 3, 1, N'Chương 2: Truy vấn cơ bản', 0),
+(8, 3, 2, N'Chương 2: Truy vấn cơ bản', 0),
+(8, 3, 1, N'Chương 3: Joins và Subqueries', 0),
+(8, 3, 2, N'Chương 3: Joins và Subqueries', 0),
+(8, 3, 1, N'Chương 4: Stored Procedures', 0),
+(8, 3, 2, N'Chương 4: Stored Procedures', 0);
 
 -- Student 9 - Course 2 (Android)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(9, 2, 1, N'Chương 1: Cơ bản về Android', 8),
-(9, 2, 2, N'Chương 1: Cơ bản về Android', 8),
-(9, 2, 1, N'Chương 2: Layout và UI', 9),
-(9, 2, 2, N'Chương 2: Layout và UI', 7),
-(9, 2, 1, N'Chương 3: Activities và Intents', 9),
-(9, 2, 2, N'Chương 3: Activities và Intents', 8),
-(9, 2, 1, N'Chương 4: Data Storage', 9),
-(9, 2, 2, N'Chương 4: Data Storage', 9);
+(9, 2, 1, N'Chương 1: Cơ bản về Android', 0),
+(9, 2, 2, N'Chương 1: Cơ bản về Android', 0),
+(9, 2, 1, N'Chương 2: Layout và UI', 0),
+(9, 2, 2, N'Chương 2: Layout và UI', 0),
+(9, 2, 1, N'Chương 3: Activities và Intents', 0),
+(9, 2, 2, N'Chương 3: Activities và Intents', 0),
+(9, 2, 1, N'Chương 4: Data Storage', 0),
+(9, 2, 2, N'Chương 4: Data Storage', 0);
 
 -- Student 9 - Course 4 (ML)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(9, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 9),
-(9, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 7),
-(9, 4, 1, N'Chương 2: Supervised Learning', 8),
-(9, 4, 2, N'Chương 2: Supervised Learning', 7),
-(9, 4, 1, N'Chương 3: Unsupervised Learning', 8),
-(9, 4, 2, N'Chương 3: Unsupervised Learning', 9),
-(9, 4, 1, N'Chương 4: Deep Learning', 9),
-(9, 4, 2, N'Chương 4: Deep Learning', 9);
+(9, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 0),
+(9, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 0),
+(9, 4, 1, N'Chương 2: Supervised Learning', 0),
+(9, 4, 2, N'Chương 2: Supervised Learning', 0),
+(9, 4, 1, N'Chương 3: Unsupervised Learning', 0),
+(9, 4, 2, N'Chương 3: Unsupervised Learning', 0),
+(9, 4, 1, N'Chương 4: Deep Learning', 0),
+(9, 4, 2, N'Chương 4: Deep Learning', 0);
 
 -- Student 10 - Course 3 (SQL)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(10, 3, 1, N'Chương 1: Cơ sở về SQL', 6),
-(10, 3, 2, N'Chương 1: Cơ sở về SQL', 5),
-(10, 3, 1, N'Chương 2: Truy vấn cơ bản', 6),
-(10, 3, 2, N'Chương 2: Truy vấn cơ bản', 7),
-(10, 3, 1, N'Chương 3: Joins và Subqueries', 6),
-(10, 3, 2, N'Chương 3: Joins và Subqueries', 5),
-(10, 3, 1, N'Chương 4: Stored Procedures', 6),
-(10, 3, 2, N'Chương 4: Stored Procedures', 6);
+(10, 3, 1, N'Chương 1: Cơ sở về SQL', 0),
+(10, 3, 2, N'Chương 1: Cơ sở về SQL', 0),
+(10, 3, 1, N'Chương 2: Truy vấn cơ bản', 0),
+(10, 3, 2, N'Chương 2: Truy vấn cơ bản', 0),
+(10, 3, 1, N'Chương 3: Joins và Subqueries', 0),
+(10, 3, 2, N'Chương 3: Joins và Subqueries', 0),
+(10, 3, 1, N'Chương 4: Stored Procedures', 0),
+(10, 3, 2, N'Chương 4: Stored Procedures', 0);
 
 -- Student 11 - Course 4 (ML)
 INSERT INTO Student_Test (StudentID, CourseID, TestOrder, ChapterName, TestScore)
 VALUES
-(11, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 5),
-(11, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 5),
-(11, 4, 1, N'Chương 2: Supervised Learning', 5),
-(11, 4, 2, N'Chương 2: Supervised Learning', 5),
-(11, 4, 1, N'Chương 3: Unsupervised Learning', 8),
-(11, 4, 2, N'Chương 3: Unsupervised Learning', 8),
-(11, 4, 1, N'Chương 4: Deep Learning', 9),
-(11, 4, 2, N'Chương 4: Deep Learning', 8);
+(11, 4, 1, N'Chương 1: Giới thiệu Machine Learning', 0),
+(11, 4, 2, N'Chương 1: Giới thiệu Machine Learning', 0),
+(11, 4, 1, N'Chương 2: Supervised Learning', 0),
+(11, 4, 2, N'Chương 2: Supervised Learning', 0),
+(11, 4, 1, N'Chương 3: Unsupervised Learning', 0),
+(11, 4, 2, N'Chương 3: Unsupervised Learning', 0),
+(11, 4, 1, N'Chương 4: Deep Learning', 0),
+(11, 4, 2, N'Chương 4: Deep Learning', 0);
+
+
+
+
 
 
 INSERT INTO Lesson (LessonOrder, CourseID, ChapterName, LessonTitle, LessonContent, LessonDuraion) VALUES
@@ -1346,6 +1301,16 @@ INSERT INTO Edit (EditTime, EditDescription, EditAdminID, EditCouponID, EditCour
 -- Chỉnh sửa coupon
 ('09:00:00', N'Tạo mới coupon giảm 15%', 1, 1, NULL),
 ('09:30:00', N'Điều chỉnh hạn sử dụng coupon 25%', 1, 2, NULL);
+
+
+
+
+
+
+
+
+
+
 
 
 ---------------------------------------------------------------------2.1---------------------------------------------------------------------
@@ -2168,18 +2133,6 @@ GO
 DECLARE @AvgScore FLOAT;
 SET @AvgScore = dbo.CalculateAverageTestScore(8); -- Tính điểm trung bình của học sinh có StudentID = 8
 PRINT 'Average Test Score: ' + CAST(@AvgScore AS NVARCHAR);
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
