@@ -101,8 +101,10 @@ app.get("/admin", async (req, res) => {
   try {
     const pool = await poolPromise;
     const query = `
-      SELECT * FROM Admin
-      WHERE AdminID LIKE @search
+      SELECT a.AdminID, u.UserName AS AdminName
+      FROM Admin a
+      JOIN Users u ON a.AdminID = u.UsernameID
+      WHERE a.AdminID LIKE @search
       ORDER BY ${sort}
     `;
     const result = await pool
@@ -122,8 +124,10 @@ app.get("/teacher", async (req, res) => {
   try {
     const pool = await poolPromise;
     const query = `
-      SELECT * FROM Teacher
-      WHERE TeacherID LIKE @search
+      SELECT t.TeacherID, u.UserName AS TeacherName, t.TeacherDescription
+      FROM Teacher t
+      JOIN Users u ON t.TeacherID = u.UsernameID
+      WHERE t.TeacherID LIKE @search
       ORDER BY ${sort}
     `;
     const result = await pool

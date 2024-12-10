@@ -17,23 +17,23 @@
     </select>
     <button type="submit">Search</button>
   </form>
-  <table>
-    <thead>
+<table>
+  <thead>
+    <tr>
+      <th>TeacherID</th>
+      <th>Teacher Name</th>
+      <th>TeacherDescription</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% teacher.forEach(teacherUser => { %>
       <tr>
-        <th>TeacherID</th>
-        <th>TeacherDescription</th>
-        <!-- Add more columns if needed -->
+        <td><%= teacherUser.TeacherID %></td>
+        <td><%= teacherUser.TeacherName %></td>
+        <td><%= teacherUser.TeacherDescription %></td>
       </tr>
-    </thead>
-    <tbody>
-      <% teacher.forEach(teacherUser => { %>
-        <tr>
-          <td><%= teacherUser.TeacherID %></td>
-          <td><%= teacherUser.TeacherDescription %></td>
-          <!-- Add more columns if needed -->
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+    <% }) %>
+  </tbody>
+</table>
 </body>
 </html>
