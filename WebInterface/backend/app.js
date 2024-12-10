@@ -15,26 +15,84 @@ app.get("/", (req, res) => {
   res.render("index", { dbName });
 });
 
+// app.get("/courses", async (req, res) => {
+//   const search = req.query.search || "";
+//   const sort = req.query.sort || "CourseID";
+//   try {
+//     const pool = await poolPromise;
+//     const query = `
+//       SELECT * FROM Course
+//       WHERE CourseName LIKE @search
+//       ORDER BY ${sort}
+//     `;
+//     const result = await pool
+//       .request()
+//       .input("search", sql.NVarChar, `%${search}%`)
+//       .query(query);
+//     res.render("courses", { courses: result.recordset, search, sort });
+//   } catch (err) {
+//     console.error("Error fetching data:", err);
+//     res.status(500).send("Error fetching data from database.");
+//   }
+// });
 app.get("/courses", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "CourseID";
+  const categoryName = req.query.categoryName || "";
+  const minRating = req.query.minRating || "";
+
   try {
     const pool = await poolPromise;
-    const query = `
-      SELECT * FROM Course
-      WHERE CourseName LIKE @search
-      ORDER BY ${sort}
-    `;
-    const result = await pool
-      .request()
-      .input("search", sql.NVarChar, `%${search}%`)
-      .query(query);
-    res.render("courses", { courses: result.recordset, search, sort });
+    let query;
+    let result;
+
+    if (search && sort) {
+      query = `
+        SELECT c.*, cat.CategoryName
+        FROM Course c
+        INNER JOIN Category cat ON c.CategoryID = cat.CategoryID
+        WHERE c.CourseName LIKE @search
+        ORDER BY ${sort}
+      `;
+      result = await pool
+        .request()
+        .input("search", sql.NVarChar, `%${search}%`)
+        .query(query);
+    } else if (categoryName && minRating) {
+      query = `
+        EXEC GetCoursesInCategoryByMinRating @CategoryName, @MinRating
+      `;
+      result = await pool
+        .request()
+        .input("CategoryName", sql.NVarChar, categoryName)
+        .input("MinRating", sql.Decimal(10, 3), minRating)
+        .query(query);
+    } else {
+      query = `
+        SELECT c.*, cat.CategoryName
+        FROM Course c
+        INNER JOIN Category cat ON c.CategoryID = cat.CategoryID
+        ORDER BY ${sort}
+      `;
+      result = await pool.query(query);
+    }
+
+    res.render("courses", {
+      courses: result.recordset,
+      search,
+      sort,
+      categoryName,
+      minRating,
+    });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
   }
 });
+
+
+
+
 
 app.get("/users", async (req, res) => {
   const search = req.query.search || "";

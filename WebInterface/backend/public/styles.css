@@ -144,3 +144,28 @@ button:hover {
     margin: 10px 0;
   }
 }
+
+#filterForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#filterForm input,
+#filterForm button {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#filterForm button {
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+
+#filterForm button:hover {
+  background-color: #45a049;
+}

@@ -1,6 +1,6 @@
 
 
--------------------------------- CREATE DATABASE --------------------------------
+------------------------------- CREATE DATABASE --------------------------------
 CREATE TABLE Users(
     UsernameID INT IDENTITY (1,1) PRIMARY KEY,
     UserEmail NVARCHAR(255),
@@ -778,8 +778,12 @@ INSERT INTO Coupon (CouponTitle, CouponValue, CouponType, CouponStartDate, Coupo
 (N'Giảm 25% khóa học IT', 25, N'Phần trăm', '2024-02-01', '2024-04-30', 1000000),
 -- Giảm theo giá trị cố định
 (N'Giảm 300k khóa học đầu tiên', 300000, N'Giá trị', '2024-01-15', '2024-03-15', 300000),
-(N'Giảm 500k khóa học nâng cao', 500000, N'Giá trị', '2024-02-15', '2024-05-15', 500000);
-
+(N'Giảm 500k khóa học nâng cao', 500000, N'Giá trị', '2024-02-15', '2024-05-15', 500000),
+(N'Giảm 20% khóa học cuối năm', 20, N'percent', '2024-12-01', '2024-12-31', 500000),
+(N'Giảm 30% Black Friday', 30, N'percent', '2024-12-01', '2024-12-25', 1000000),
+(N'Giảm 200k khóa học mới', 200000, N'fixed', '2024-12-05', '2024-12-20', 200000),
+(N'Giảm 50% nhân dịp giáng sinh', 50, N'percent', '2024-12-10', '2025-01-10', 2000000),
+(N'Giảm 1 triệu khóa học', 1000000, N'fixed', '2024-12-08', '2024-12-15', 1000000);
 
 -- Insert Orders
 INSERT INTO Orders (OrderID,OrderPaymentStatus, OrderDate, OrderPaymentCode, StudentID,TotalAmount,CouponID) VALUES
@@ -1634,7 +1638,7 @@ INSERT INTO Edit (EditTime, EditDescription, EditAdminID, EditCouponID, EditCour
 
 
 ---------------------------------------------------------------------2.3---------------------------------------------------------------------
---Procedure 1: Tìm kiếm và hiển thị thông tin các khóa học trong một danh mục cụ thể,
+--Function 1: Tìm kiếm và hiển thị thông tin các khóa học trong một danh mục cụ thể,
 --có điểm đánh giá trung bình cao hơn hoặc bằng một mức điểm cho trước
 GO
 CREATE PROCEDURE GetCoursesInCategoryByMinRating
@@ -1683,7 +1687,7 @@ END;
 EXEC GetCoursesInCategoryByMinRating @CategoryName = N'Lập trình', @MinRating = 4.0
 
 
---Procedure 1: lấy danh sách các mã giảm giá còn hiệu lực tại một thời điểm cụ thể,
+--Function 2: lấy danh sách các mã giảm giá còn hiệu lực tại một thời điểm cụ thể,
 --kèm theo thống kê số lượng đơn hàng đã sử dụng mã giảm giá đó.
 
 GO

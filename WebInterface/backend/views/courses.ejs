@@ -7,7 +7,7 @@
 </head>
 <body>
   <h1>Courses</h1>
-   <button onclick="window.location.href='/'">Go Back</button>
+  <button onclick="window.location.href='/'">Go Back</button>
   <form method="GET" action="/courses" id="sortForm">
     <input type="text" name="search" placeholder="Search by course name" value="<%= search %>">
     <select name="sort" onchange="document.getElementById('sortForm').submit()">
@@ -18,6 +18,11 @@
       <option value="CourseEndDate" <%= sort === 'CourseEndDate' ? 'selected' : '' %>>Course End Date</option>
     </select>
     <button type="submit">Search</button>
+  </form>
+  <form method="GET" action="/courses" id="filterForm">
+    <input type="text" name="categoryName" placeholder="Category Name" required value="<%= categoryName %>">
+    <input type="number" step="0.001" name="minRating" placeholder="Minimum Rating" required value="<%= minRating %>">
+    <button type="submit">Filter</button>
   </form>
   <table>
     <thead>
@@ -30,7 +35,8 @@
         <th>CourseImage</th>
         <th>CourseStartDate</th>
         <th>CourseEndDate</th>
-        <th>CategoryID</th>
+        <th>CategoryName</th>
+        <th>CourseRating</th>
       </tr>
     </thead>
     <tbody>
@@ -44,7 +50,8 @@
           <td><%= course.CourseImage %></td>
           <td><%= course.CourseStartDate %></td>
           <td><%= course.CourseEndDate %></td>
-          <td><%= course.CategoryID %></td>
+          <td><%= course.CategoryName %></td>
+          <td><%= course.CourseAverageRating %></td>
         </tr>
       <% }) %>
     </tbody>
