@@ -16,21 +16,21 @@
     </select>
     <button type="submit">Search</button>
   </form>
-  <table>
-    <thead>
+<table>
+  <thead>
+    <tr>
+      <th>StudentID</th>
+      <th>Student Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% student.forEach(stu => { %>
       <tr>
-        <th>StudentID</th>
-        <!-- Add more columns if needed -->
+        <td><%= stu.StudentID %></td>
+        <td><%= stu.StudentName %></td>
       </tr>
-    </thead>
-    <tbody>
-      <% student.forEach(stu => { %>
-        <tr>
-          <td><%= stu.StudentID %></td>
-          <!-- Add more columns if needed -->
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+    <% }) %>
+  </tbody>
+</table>
 </body>
 </html>

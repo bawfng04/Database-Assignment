@@ -118,6 +118,31 @@ app.get("/admin", async (req, res) => {
   }
 });
 
+
+app.get("/student", async (req, res) => {
+  const search = req.query.search || "";
+  const sort = req.query.sort || "StudentID";
+  try {
+    const pool = await poolPromise;
+    const query = `
+      SELECT s.StudentID, u.UserName AS StudentName
+      FROM Student s
+      JOIN Users u ON s.StudentID = u.UsernameID
+      WHERE s.StudentID LIKE @search
+      ORDER BY ${sort}
+    `;
+    const result = await pool
+      .request()
+      .input("search", sql.NVarChar, `%${search}%`)
+      .query(query);
+    res.render("student", { student: result.recordset, search, sort });
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    res.status(500).send("Error fetching data from database.");
+  }
+});
+
+
 app.get("/teacher", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "TeacherID";
