@@ -1654,6 +1654,390 @@ EXEC DeleteCoupon '1';
 
 
 
+---------------------------------------------------------------------2.2---------------------------------------------------------------------
+
+---TRIGGER 1
+GO
+CREATE TRIGGER TR_Orders_Calculate_Total
+ON Orders
+AFTER UPDATE
+AS
+BEGIN
+  -- Declare variables
+    DECLARE @OrderID INT
+    DECLARE @PaymentStatus NVARCHAR(255)
+
+    -- Get OrderID and payment status from inserted record
+    SELECT @OrderID = OrderID, @PaymentStatus = OrderPaymentStatus
+    FROM inserted
+
+    -- Check if order is already paid
+    IF EXISTS (
+        SELECT 1
+        FROM Orders
+        WHERE OrderID = @OrderID
+        AND OrderPaymentStatus = 'paid'
+    )
+    BEGIN
+        RAISERROR ('Không thể thay đổi đơn hàng đã thanh toán.', 16, 1)
+        ROLLBACK TRANSACTION
+        RETURN
+    END
+    -- Declare variables
+    DECLARE @CouponID INT
+    DECLARE @SubTotal FLOAT
+    DECLARE @Discount FLOAT
+    DECLARE @FinalTotal FLOAT
+    DECLARE @CouponType NVARCHAR(255)
+    DECLARE @CouponValue INT
+    DECLARE @CouponMaxDiscount INT
+    DECLARE @CurrentDate DATE
+
+    -- Get current date
+    SET @CurrentDate = GETDATE()
+
+    -- Get the affected OrderID from inserted records
+    SELECT @OrderID = OrderID, @CouponID = CouponID
+    FROM inserted
+
+    -- Calculate subtotal by summing up course prices
+    SELECT @SubTotal = COALESCE(SUM(c.CoursePrice), 0)
+    FROM CourseOrder co
+    JOIN Course c ON co.CourseID = c.CourseID
+    WHERE co.OrderID = @OrderID
+
+    -- If there's a coupon, calculate discount
+    IF @CouponID IS NOT NULL
+    BEGIN
+        -- Get coupon details with date validation
+        SELECT
+@CouponType = CouponType,
+            @CouponValue = CouponValue,
+            @CouponMaxDiscount = CouponMaxDiscount
+        FROM Coupon
+        WHERE CouponID = @CouponID
+        AND CouponStartDate <= @CurrentDate
+        AND CouponExpire >= @CurrentDate
+
+        -- Only calculate discount if coupon is valid (not NULL from previous query)
+        IF @CouponType IS NOT NULL
+        BEGIN
+            -- Calculate discount based on coupon type
+            IF @CouponType = 'percent'
+            BEGIN
+                SET @Discount = (@SubTotal * @CouponValue) / 100.0
+                -- Check if discount exceeds max discount
+                IF @Discount > @CouponMaxDiscount
+                    SET @Discount = @CouponMaxDiscount
+            END
+            ELSE -- Fixed value
+            BEGIN
+                SET @Discount = @CouponValue
+                -- Check if discount exceeds max discount
+                IF @Discount > @CouponMaxDiscount
+                    SET @Discount = @CouponMaxDiscount
+                -- Check if discount exceeds subtotal
+                IF @Discount > @SubTotal
+                    SET @Discount = @SubTotal
+            END
+        END
+        ELSE
+        BEGIN
+            SET @Discount = 0 -- Coupon is not valid due to dates
+        END
+    END
+    ELSE
+    BEGIN
+        SET @Discount = 0
+    END
+
+    -- Calculate final total
+    SET @FinalTotal = @SubTotal - @Discount
+
+    -- Update the TotalAmount in Orders table
+    UPDATE Orders
+    SET TotalAmount = @FinalTotal
+    WHERE OrderID = @OrderID
+END;
+
+
+GO
+CREATE TRIGGER TR_CourseOrder_Calculate_Total
+ON CourseOrder
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+	IF EXISTS (
+        SELECT 1
+
+FROM Orders o
+        WHERE o.OrderPaymentStatus = 'paid'
+        AND o.OrderID IN (
+            SELECT OrderID FROM inserted
+            UNION
+            SELECT OrderID FROM deleted
+        )
+    )
+    BEGIN
+        RAISERROR ('Không thể thay đổi đơn hàng đã thanh toán.', 16, 1)
+        ROLLBACK TRANSACTION
+        RETURN
+    END
+    DECLARE @CurrentDate DATE
+    SET @CurrentDate = GETDATE()
+
+    UPDATE Orders
+    SET TotalAmount = (
+        SELECT COALESCE(SUM(c.CoursePrice), 0) -
+            CASE
+                WHEN cp.CouponType = N'percent'
+                AND cp.CouponStartDate <= @CurrentDate
+                AND cp.CouponExpire >= @CurrentDate THEN
+                    CASE
+                        WHEN (COALESCE(SUM(c.CoursePrice), 0) * cp.CouponValue / 100.0) > cp.CouponMaxDiscount
+                        THEN cp.CouponMaxDiscount
+                        ELSE (COALESCE(SUM(c.CoursePrice), 0) * cp.CouponValue / 100.0)
+                    END
+                WHEN cp.CouponType = N'value'
+                AND cp.CouponStartDate <= @CurrentDate
+                AND cp.CouponExpire >= @CurrentDate THEN
+                    CASE
+                        WHEN cp.CouponValue > cp.CouponMaxDiscount THEN cp.CouponMaxDiscount
+                        WHEN cp.CouponValue > COALESCE(SUM(c.CoursePrice), 0) THEN COALESCE(SUM(c.CoursePrice), 0)
+                        ELSE cp.CouponValue
+                    END
+                ELSE 0
+            END
+        FROM CourseOrder co2
+        JOIN Course c ON co2.CourseID = c.CourseID
+        LEFT JOIN Orders o ON co2.OrderID = o.OrderID
+        LEFT JOIN Coupon cp ON o.CouponID = cp.CouponID
+        WHERE co2.OrderID = Orders.OrderID
+        GROUP BY co2.OrderID, cp.CouponType, cp.CouponValue, cp.CouponMaxDiscount,
+                cp.CouponStartDate, cp.CouponExpire
+    )
+    WHERE OrderID IN (
+        SELECT OrderID FROM inserted
+        UNION
+        SELECT OrderID FROM deleted
+    );
+END;
+
+
+
+---Testcase
+--Tạo đơn hàng mới có OrderID là 103, lấy ngày hiện tại bằng hàm GETDATE(), tổng giá trị đơn hàng ban đầu là 0 và chưa có mã giảm giá nào
+INSERT INTO Orders (OrderID, OrderPaymentStatus, OrderDate, StudentID,TotalAmount,CouponID)
+VALUES
+	(103, 'unpaid', GETDATE(), 15,0,NULL);
+
+--Kiểm tra đơn hàng có OrderID là 103 -> TotalAmmount bằng 0 vì đơn hàng này chưa có khóa học nào
+SELECT *
+FROM Orders
+WHERE OrderID=103
+
+
+
+--Thêm 2 khóa học có CourseID là 1 và 2  vào đơn hàng có id là 103 trong bảng CourseOrder
+INSERT INTO CourseOrder( CourseID,OrderID)
+VALUES
+	(1,103),
+	(2,103);
+--Kiểm tra giá tiền của 2 khóa học có id là 1 , 2, 3 và 4
+SELECT CoursePrice
+FROM Course
+WHERE CourseID IN(1,2,3,4)
+
+--Vậy trigger TR_CourseOrder_Calculate_Total đã được chạy đẻ tính toán tổng tiền khóa học khi có thay đổi trên bảng CourseOrder là 2 000 000 + 2 200 000 = 4 200 000
+--Thử UPDATE bảng CourseOrder có OrderID là 103 , có khóa học 1 thay thành khóa học 3
+UPDATE CourseOrder
+SET CourseID=3
+WHERE CourseID=1 AND OrderID=103
+
+--Khi đó đơn hàng có OrderID là 103 sẽ có khóa học 2 và khóa học 3, tổng tiền là: 2 200 000 + 2 300 000 = 4 500 000
+
+--Thử DELETE bảng CourseOrder có id đơn hàng là 103, khóa học 2: Khi đó đơn hàng có OrderID là 103 chỉ còn khóa học 3, tổng tiền sẽ là 2 300 000
+DELETE FROM CourseOrder
+WHERE  CourseID=2 AND OrderID=103
+
+--INSERT phiếu giảm giá vào:
+INSERT INTO Coupon (CouponID,CouponTitle, CouponValue, CouponType, CouponStartDate, CouponExpire, CouponMaxDiscount)
+ VALUES
+-- Giảm theo phần trăm
+(9,N'Giảm 15% khóa học mới', 15,'percent' , '2024-01-01', '2025-04-28', 1500000),
+(10,N'Giảm 25% khóa học sql', 25, 'percent', '2024-05-01', '2025-03-28', 1500000),
+(11,N'Giảm 300k nhân diệp giáng sinh', 300000, 'value', '2024-01-15', '2024-12-30', 1500000);
+
+--Thử UPDATE đơn hàng có OrderID là 103 , gắn phiếu giảm giá có CouponID là 10 cho đơn hàng
+UPDATE Orders
+SET CouponID=10
+WHERE OrderID=103
+--Khi đó đơn hàng có OrderID là 103 sẽ giảm giá 25%, giá trị giảm là 2 300 000 x 25%= 575 000 , vì giá trị giảm bé hơn 1 500 000 nên giữ nguyên giá trị giảm này, khi đó giá trị đơn hàng còn : 2 300 000 – 575 000 = 1 725 000
+--Ta cập nhật CourseOrder để đơn hàng có OrderID là 103 có thêm khóa học 1, 2 và 4
+INSERT INTO CourseOrder( CourseID,OrderID)
+VALUES
+	(1,103),
+	(2,103),
+	(4,103);
+--Khi đó tổng giá trị khóa học sẽ là 2 000 000 + 2 200 00 + 2 300 000 + 1 900 000 = 8 400 000
+--Vì áp dụng phiếu giảm giá 25%, nên giá trị giảm sẽ là 8 400 000 x 25%=2 100 000, vì giá trị giảm này lớn hơn 1 500 000 nên chỉ được giảm 1 500 000, tổng giá tiền khóa học sẽ còn:
+--8 400 000 – 1 500 000= 6 900 000
+--Ta thêm 1 đơn hàng có ID là 104, với trạng thái thanh toán là “paid”
+INSERT INTO Orders (OrderID, OrderPaymentStatus, OrderDate, StudentID,TotalAmount,CouponID)
+VALUES
+	(104, 'paid', GETDATE(), 15,0,NULL);
+--Nếu ta thử gắn phiếu giảm giá cho đơn hàng này -> Sẽ in ra lỗi, vì đơn hàng đã thanh toán rồi không thay đổi được nữa
+UPDATE Orders
+SET CouponID=10
+WHERE OrderID=104
+
+
+
+
+
+-- TRIGGER 2
+GO
+CREATE OR ALTER TRIGGER TR_Review_Update_Course_Rating
+ON Review
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    -- Update Course average rating for all affected courses
+    UPDATE Course
+    SET CourseAverageRating = (
+        SELECT AVG(CAST(ReviewScore AS FLOAT))
+        FROM Review r
+        WHERE r.CourseID = Course.CourseID
+        GROUP BY r.CourseID
+    )
+    WHERE CourseID IN (
+        -- Get affected CourseIDs from both inserted and deleted
+        SELECT CourseID FROM inserted
+        UNION
+        SELECT CourseID FROM deleted
+    );
+END;
+
+--Testcase
+
+--Đầu tiên ta  kiểm tra dữ liệu mẫu bảng Review, kiểm tra các đánh giá cho các khóa học có CourseID=1
+--Vậy ban đầu Course 1 có 5 đánh giá, điểm số đánh giá lần lượt là 5, 4, 5, 4, 5
+SELECT *
+FROM Review
+WHERE CourseID=1
+--Khi thêm một đánh giá cho Course 1 bằng câu lệnh như sau:
+INSERT INTO Review (ReviewID, CourseID, ReviewScore, ReviewContent, StudentID) VALUES
+(6, 1, 1, N'Khóa học này quá mông lung', 15);
+
+--Vậy đánh giá trung bình sau khi thêm dữ liệu vô là: (5 + 4 + 5 + 4 + 5 + 1)/6 =4
+--Ta kiểm tra CourseAverageRating của Course có CourseID là 1 -> Kết quả như sau:
+SELECT CourseAverageRating
+FROM Course
+WHERE CourseID=1
+
+-- xóa đi một hàng trong Review có ReviewID là 1 và CourseID là 1 - Khi đó đánh giá trung bình sẽ là : (4+5+4+5+1)/5=3.8
+DELETE FROM Review
+WHERE ReviewID=1 AND CourseID=1
+--Ta kiểm tra lại CourseAverageRating của Course có CourseID là 1
+SELECT CourseAverageRating
+FROM Course
+WHERE CourseID=1
+--Ta cập nhật Review có ReviewID là 2 và CourseID là 1, cập nhật lại ReviewScore là 2
+UPDATE Review
+SET ReviewScore=2
+WHERE ReviewID=2 AND CourseID=1
+--Khi đó đánh giá trung bình sẽ là : (2+5+4+5+1)/5=3.4
+
+
+
+
+---------------------------------------------------------------------2.3---------------------------------------------------------------------
+--Function 1: Tìm kiếm và hiển thị thông tin các khóa học trong một danh mục cụ thể,
+--có điểm đánh giá trung bình cao hơn hoặc bằng một mức điểm cho trước
+GO
+CREATE PROCEDURE GetCoursesInCategoryByMinRating
+    @CategoryName NVARCHAR(255),
+    @MinRating DECIMAL(10,3)
+AS
+BEGIN
+    -- Kiểm tra tham số đầu vào
+    IF @MinRating < 1 OR @MinRating > 5
+    BEGIN
+        RAISERROR('Rating phải nằm trong khoảng từ 1 đến 5', 16, 1)
+        RETURN
+    END
+
+    SELECT
+		cat.CategoryName,
+        c.CourseName,
+	 COUNT(r.ReviewID) as TotalReviews,
+        c.CourseAverageRating,
+        c.CoursePrice,
+        c.CourseStartDate,
+        c.CourseEndDate,
+        cat.CategoryName
+    FROM Course c
+    INNER JOIN Category cat ON c.CategoryID = cat.CategoryID
+    LEFT JOIN Review r ON c.CourseID = r.CourseID
+    WHERE
+        cat.CategoryName LIKE N'%' + @CategoryName + '%'
+        AND c.CourseAverageRating >= @MinRating
+    GROUP BY
+		cat.CategoryName,
+        c.CourseName,
+        c.CourseAverageRating,
+        c.CoursePrice,
+        c.CourseStartDate,
+        c.CourseEndDate,
+        cat.CategoryName
+    HAVING
+        COUNT(r.ReviewID) > 0  -- Thay đổi điều kiện HAVING
+    ORDER BY
+        c.CourseAverageRating DESC;
+END;
+
+
+-- Thực thi câu lệnh mẫu
+EXEC GetCoursesInCategoryByMinRating @CategoryName = N'Lập trình', @MinRating = 4.0
+
+
+--Function 2: lấy danh sách các mã giảm giá còn hiệu lực tại một thời điểm cụ thể,
+--kèm theo thống kê số lượng đơn hàng đã sử dụng mã giảm giá đó.
+
+GO
+CREATE PROCEDURE sp_GetValidCoupons
+    @CheckDate DATE
+AS
+BEGIN
+    SELECT
+        c.CouponID,
+        c.CouponTitle,
+        c.CouponValue,
+        c.CouponType,
+        c.CouponStartDate,
+        c.CouponExpire,
+        c.CouponMaxDiscount,
+        COUNT(DISTINCT o.OrderID) as TotalOrders
+    FROM Coupon c, Orders o
+    WHERE c.CouponStartDate <= @CheckDate
+    AND c.CouponExpire >= @CheckDate
+    AND c.CouponID = o.CouponID
+    GROUP BY
+        c.CouponID,
+        c.CouponTitle,
+        c.CouponValue,
+        c.CouponType,
+        c.CouponStartDate,
+        c.CouponExpire,
+        c.CouponMaxDiscount
+    ORDER BY
+        c.CouponExpire ASC;
+END;
+
+-- Thực thi câu lệnh mẫu
+EXEC sp_GetValidCoupons @CheckDate = '2024-03-27'
+
+
 ---------------------------------------------------------------------2.4---------------------------------------------------------------------
 -- Hàm tính tổng doanh thu từ các đơn hàng của một khóa học
 
