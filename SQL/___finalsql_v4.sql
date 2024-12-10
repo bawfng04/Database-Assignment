@@ -296,142 +296,143 @@ CREATE TABLE Review(
     FOREIGN KEY (CourseID) REFERENCES Course(CourseID),
     FOREIGN KEY (StudentID) REFERENCES Student(StudentID)
 );
-GO
-CREATE PROCEDURE InsertCoupon
-    @CouponTitle NVARCHAR(255),
-    @CouponValue INT,
-    @CouponType NVARCHAR(255),
-    @CouponStartDate DATE,
-    @CouponExpire DATE,
-    @CouponMaxDiscount INT,
-    @ErrorMessage NVARCHAR(255) OUTPUT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    BEGIN TRY
-        -- Validate nulls
-        IF @CouponTitle IS NULL OR @CouponValue IS NULL OR @CouponType IS NULL OR
-           @CouponStartDate IS NULL OR @CouponExpire IS NULL OR @CouponMaxDiscount IS NULL
-        BEGIN
-            PRINT 'Lỗi: Dữ liệu không được để trống.'
-            RAISERROR('Dữ liệu không được để trống.', 16, 1)
-            RETURN
-        END
 
-        -- Validate title
-        IF LEN(TRIM(@CouponTitle)) = 0
-        BEGIN
-            PRINT 'Lỗi: Tiêu đề mã giảm giá không được để trống.'
-            RAISERROR('Tiêu đề mã giảm giá không được để trống.', 16, 1)
-            RETURN
-        END
+-- GO
+-- CREATE PROCEDURE InsertCoupon
+--     @CouponTitle NVARCHAR(255),
+--     @CouponValue INT,
+--     @CouponType NVARCHAR(255),
+--     @CouponStartDate DATE,
+--     @CouponExpire DATE,
+--     @CouponMaxDiscount INT,
+--     @ErrorMessage NVARCHAR(255) OUTPUT
+-- AS
+-- BEGIN
+--     SET NOCOUNT ON;
+--     BEGIN TRY
+--         -- Validate nulls
+--         IF @CouponTitle IS NULL OR @CouponValue IS NULL OR @CouponType IS NULL OR
+--            @CouponStartDate IS NULL OR @CouponExpire IS NULL OR @CouponMaxDiscount IS NULL
+--         BEGIN
+--             PRINT 'Lỗi: Dữ liệu không được để trống.'
+--             RAISERROR('Dữ liệu không được để trống.', 16, 1)
+--             RETURN
+--         END
 
-        -- Validate type
-        IF @CouponType NOT IN ('percent', 'fixed')
-        BEGIN
-            PRINT 'Lỗi: Loại mã giảm giá không hợp lệ.'
-            RAISERROR('Loại mã giảm giá không hợp lệ.', 16, 1)
-            RETURN
-        END
+--         -- Validate title
+--         IF LEN(TRIM(@CouponTitle)) = 0
+--         BEGIN
+--             PRINT 'Lỗi: Tiêu đề mã giảm giá không được để trống.'
+--             RAISERROR('Tiêu đề mã giảm giá không được để trống.', 16, 1)
+--             RETURN
+--         END
 
-        -- Validate value
-        IF @CouponValue <= 0
-        BEGIN
-            PRINT 'Lỗi: Giá trị mã giảm giá phải lớn hơn 0.'
-            RAISERROR('Giá trị mã giảm giá phải lớn hơn 0.', 16, 1)
-            RETURN
-        END
+--         -- Validate type
+--         IF @CouponType NOT IN ('percent', 'fixed')
+--         BEGIN
+--             PRINT 'Lỗi: Loại mã giảm giá không hợp lệ.'
+--             RAISERROR('Loại mã giảm giá không hợp lệ.', 16, 1)
+--             RETURN
+--         END
 
-        -- Validate dates
-        IF @CouponStartDate < GETDATE()
-        BEGIN
-            PRINT 'Lỗi: Ngày bắt đầu không được trong quá khứ.'
-            RAISERROR('Ngày bắt đầu không được trong quá khứ.', 16, 1)
-            RETURN
-        END
+--         -- Validate value
+--         IF @CouponValue <= 0
+--         BEGIN
+--             PRINT 'Lỗi: Giá trị mã giảm giá phải lớn hơn 0.'
+--             RAISERROR('Giá trị mã giảm giá phải lớn hơn 0.', 16, 1)
+--             RETURN
+--         END
 
-        IF @CouponStartDate >= @CouponExpire
-        BEGIN
-            PRINT 'Lỗi: Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.'
-            RAISERROR('Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.', 16, 1)
-            RETURN
-        END
+--         -- Validate dates
+--         IF @CouponStartDate < GETDATE()
+--         BEGIN
+--             PRINT 'Lỗi: Ngày bắt đầu không được trong quá khứ.'
+--             RAISERROR('Ngày bắt đầu không được trong quá khứ.', 16, 1)
+--             RETURN
+--         END
 
-        -- Validate max discount
-        IF @CouponMaxDiscount < 0
-        BEGIN
-            PRINT 'Lỗi: Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.'
-            RAISERROR('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.', 16, 1)
-            RETURN
-        END
+--         IF @CouponStartDate >= @CouponExpire
+--         BEGIN
+--             PRINT 'Lỗi: Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.'
+--             RAISERROR('Ngày bắt đầu mã giảm giá phải trước ngày hết hạn.', 16, 1)
+--             RETURN
+--         END
 
-        -- Validate percentage type
-        IF @CouponType = 'percent' AND (@CouponValue > 100 OR @CouponValue < 0)
-        BEGIN
-            PRINT 'Lỗi: Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.'
-            RAISERROR('Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.', 16, 1)
-            RETURN
-        END
+--         -- Validate max discount
+--         IF @CouponMaxDiscount < 0
+--         BEGIN
+--             PRINT 'Lỗi: Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.'
+--             RAISERROR('Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0.', 16, 1)
+--             RETURN
+--         END
 
-        -- Validate value type
-        IF @CouponType = 'fixed' AND @CouponValue <= 0
-        BEGIN
-            PRINT 'Lỗi: Giá trị giảm giá phải lớn hơn 0.'
-            RAISERROR('Giá trị giảm giá phải lớn hơn 0.', 16, 1)
-            RETURN
-        END
+--         -- Validate percentage type
+--         IF @CouponType = 'percent' AND (@CouponValue > 100 OR @CouponValue < 0)
+--         BEGIN
+--             PRINT 'Lỗi: Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.'
+--             RAISERROR('Giá trị phần trăm phải nằm trong khoảng từ 0 đến 100.', 16, 1)
+--             RETURN
+--         END
 
-        -- Check duplicate title
-        IF EXISTS (SELECT 1 FROM Coupon WHERE CouponTitle = @CouponTitle)
-        BEGIN
-            PRINT 'Lỗi: Tiêu đề mã giảm giá đã tồn tại.'
-            RAISERROR('Tiêu đề mã giảm giá đã tồn tại.', 16, 1)
-            RETURN
-        END
+--         -- Validate value type
+--         IF @CouponType = 'fixed' AND @CouponValue <= 0
+--         BEGIN
+--             PRINT 'Lỗi: Giá trị giảm giá phải lớn hơn 0.'
+--             RAISERROR('Giá trị giảm giá phải lớn hơn 0.', 16, 1)
+--             RETURN
+--         END
 
-        --nếu type = giá trị thì max discount phải <= value
-        IF @CouponType = 'fixed' AND @CouponMaxDiscount > @CouponValue
-        BEGIN
-            PRINT 'Lỗi: Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.'
-            RAISERROR('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.', 16, 1)
-            RETURN
-        END
+--         -- Check duplicate title
+--         IF EXISTS (SELECT 1 FROM Coupon WHERE CouponTitle = @CouponTitle)
+--         BEGIN
+--             PRINT 'Lỗi: Tiêu đề mã giảm giá đã tồn tại.'
+--             RAISERROR('Tiêu đề mã giảm giá đã tồn tại.', 16, 1)
+--             RETURN
+--         END
 
-        -- Insert with transaction
-        BEGIN TRANSACTION
-            INSERT INTO Coupon (
-                CouponTitle,
-                CouponValue,
-                CouponType,
-                CouponStartDate,
-                CouponExpire,
-                CouponMaxDiscount
-            )
-            VALUES (
-                @CouponTitle,
-                @CouponValue,
-                @CouponType,
-                @CouponStartDate,
-                @CouponExpire,
-                @CouponMaxDiscount
-            )
-        COMMIT TRANSACTION
+--         --nếu type = giá trị thì max discount phải <= value
+--         IF @CouponType = 'fixed' AND @CouponMaxDiscount > @CouponValue
+--         BEGIN
+--             PRINT 'Lỗi: Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.'
+--             RAISERROR('Giá trị giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị giảm giá.', 16, 1)
+--             RETURN
+--         END
 
-        PRINT 'Thêm mã giảm giá thành công.'
-    END TRY
-    BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION
+--         -- Insert with transaction
+--         BEGIN TRANSACTION
+--             INSERT INTO Coupon (
+--                 CouponTitle,
+--                 CouponValue,
+--                 CouponType,
+--                 CouponStartDate,
+--                 CouponExpire,
+--                 CouponMaxDiscount
+--             )
+--             VALUES (
+--                 @CouponTitle,
+--                 @CouponValue,
+--                 @CouponType,
+--                 @CouponStartDate,
+--                 @CouponExpire,
+--                 @CouponMaxDiscount
+--             )
+--         COMMIT TRANSACTION
+
+--         PRINT 'Thêm mã giảm giá thành công.'
+--     END TRY
+--     BEGIN CATCH
+--         IF @@TRANCOUNT > 0
+--             ROLLBACK TRANSACTION
 
 
 
-        -- PRINT 'Lỗi: ' + ERROR_MESSAGE()
-        SET @ErrorMessage = ERROR_MESSAGE()
-        PRINT @ErrorMessage
-        RETURN
-    END CATCH
-END
-GO
+--         -- PRINT 'Lỗi: ' + ERROR_MESSAGE()
+--         SET @ErrorMessage = ERROR_MESSAGE()
+--         PRINT @ErrorMessage
+--         RETURN
+--     END CATCH
+-- END
+-- GO
 
 ---TRIGGER 1
 GO
@@ -1611,7 +1612,272 @@ INSERT INTO Edit (EditTime, EditDescription, EditAdminID, EditCouponID, EditCour
 
 
 
+-------------------------------------------------Trugger trước khi insert dữ liệu-------------------------------------------------
 
+
+--------------- TRIGGER để check trước khi insert dữ liệu ----------------
+-- Trigger khi insert dữ liệu vào bảng Users
+GO
+CREATE TRIGGER trg_Users_Insert
+ON Users
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @UserEmail NVARCHAR(255), @UserPhone VARCHAR(10);
+
+    SELECT @UserEmail = UserEmail, @UserPhone = UserPhone
+    FROM inserted;
+
+    -- Validate UserEmail
+    IF @UserEmail IS NULL OR @UserEmail NOT LIKE '%_@__%.__%'
+    BEGIN
+        RAISERROR ('Invalid email format', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate UserPhone
+    IF LEN(@UserPhone) <> 10 OR @UserPhone NOT LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+    BEGIN
+        RAISERROR ('Invalid phone number', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate unique UserEmail
+    IF EXISTS (SELECT 1 FROM Users WHERE UserEmail = @UserEmail)
+    BEGIN
+        RAISERROR ('UserEmail must be unique', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate unique UserPhone
+    IF EXISTS (SELECT 1 FROM Users WHERE UserPhone = @UserPhone)
+    BEGIN
+        RAISERROR ('UserPhone must be unique', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- nếu không có lỗi thì insert dữ liệu
+    INSERT INTO Users (UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username)
+    SELECT UserEmail, UserPhone, UserPassword, UserAddress, UserImage, Username
+    FROM inserted;
+END;
+
+
+--trigger cho bảng teacher
+GO
+CREATE TRIGGER trg_Teacher_Insert
+ON Teacher
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @TeacherDescription NVARCHAR(255);
+
+    SELECT @TeacherDescription = TeacherDescription
+    FROM inserted;
+
+    -- Validate TeacherDescription
+    IF @TeacherDescription IS NULL
+    BEGIN
+        RAISERROR ('TeacherDescription cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- nếu không có lỗi thì insert dữ liệu
+    INSERT INTO Teacher (TeacherID, TeacherDescription)
+    SELECT TeacherID, TeacherDescription
+    FROM inserted;
+END;
+
+
+-- Trigger khi insert dữ liệu vào bảng Admin
+GO
+CREATE TRIGGER trg_Admin_Insert
+ON Admin
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @AdminID INT;
+
+    SELECT @AdminID = AdminID
+    FROM inserted;
+
+    -- Validate AdminID exists in Users table
+    IF NOT EXISTS (SELECT 1 FROM Users WHERE UsernameID = @AdminID)
+    BEGIN
+        RAISERROR ('AdminID does not exist in Users table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- If validation passes, insert the data
+    INSERT INTO Admin (AdminID)
+    SELECT AdminID
+    FROM inserted;
+END;
+
+
+-- Trigger khi insert dữ liệu vào bảng Student
+GO
+CREATE TRIGGER trg_Student_Insert
+ON Student
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @OptionName NVARCHAR(255), @QuestionID INT, @StudentID INT;
+
+    SELECT @OptionName = OptionName, @QuestionID = QuestionID, @StudentID = StudentID
+    FROM inserted;
+
+    -- Validate OptionName
+    IF @OptionName IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Options WHERE OptionName = @OptionName)
+    BEGIN
+        RAISERROR ('OptionName does not exist in Options table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate QuestionID
+    IF @QuestionID IS NOT NULL AND NOT EXISTS (SELECT 1 FROM Question WHERE QuestionID = @QuestionID)
+    BEGIN
+        RAISERROR ('QuestionID does not exist in Question table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- If validation passes, insert the data
+    INSERT INTO Student (StudentID, OptionName, QuestionID)
+    SELECT StudentID, OptionName, QuestionID
+    FROM inserted;
+END;
+GO
+
+
+-- Trigger khi insert dữ liệu vào bảng Category
+GO
+CREATE TRIGGER trg_Category_Insert
+ON Category
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @CategoryName NVARCHAR(255), @CategoryDescription NVARCHAR(255);
+
+    SELECT @CategoryName = CategoryName, @CategoryDescription = CategoryDescription
+    FROM inserted;
+
+    -- Validate CategoryName
+    IF @CategoryName IS NULL
+    BEGIN
+        RAISERROR ('CategoryName cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CategoryDescription
+    IF @CategoryDescription IS NULL
+    BEGIN
+        RAISERROR ('CategoryDescription cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- If validation passes, insert the data
+    INSERT INTO Category (CategoryName, CategoryDescription)
+    SELECT CategoryName, CategoryDescription
+    FROM inserted;
+END;
+
+-- Trigger khi insert dữ liệu vào bảng Course
+GO
+CREATE TRIGGER trg_Course_Insert
+ON Course
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @CourseName NVARCHAR(255), @CourseStatus NVARCHAR(255), @CourseDescription NVARCHAR(255),
+            @CoursePrice INT, @CourseImage NVARCHAR(255), @CourseStartDate DATE, @CourseEndDate DATE,
+            @CategoryID INT;
+
+    SELECT @CourseName = CourseName, @CourseStatus = CourseStatus, @CourseDescription = CourseDescription,
+            @CoursePrice = CoursePrice, @CourseImage = CourseImage, @CourseStartDate = CourseStartDate,
+            @CourseEndDate = CourseEndDate, @CategoryID = CategoryID
+    FROM inserted;
+
+    -- Validate CourseName
+    IF @CourseName IS NULL
+    BEGIN
+        RAISERROR ('CourseName cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseStatus
+    IF @CourseStatus IS NULL
+    BEGIN
+        RAISERROR ('CourseStatus cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseDescription
+    IF @CourseDescription IS NULL
+    BEGIN
+        RAISERROR ('CourseDescription cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CoursePrice
+    IF @CoursePrice IS NULL
+    BEGIN
+        RAISERROR ('CoursePrice cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseImage
+    IF @CourseImage IS NULL
+    BEGIN
+        RAISERROR ('CourseImage cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseStartDate
+    IF @CourseStartDate IS NULL
+    BEGIN
+        RAISERROR ('CourseStartDate cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CourseEndDate
+    IF @CourseEndDate IS NULL
+    BEGIN
+        RAISERROR ('CourseEndDate cannot be null', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Validate CategoryID
+    IF NOT EXISTS (SELECT 1 FROM Category WHERE CategoryID = @CategoryID)
+    BEGIN
+        RAISERROR ('CategoryID does not exist in Category table', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+
+    END
+
+
+    -- If validation passes, insert the data
+    INSERT INTO Course (CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID)
+    SELECT CourseName, CourseStatus, CourseDescription, CoursePrice, CourseImage, CourseStartDate, CourseEndDate, CategoryID
+    FROM inserted;
+END;
 
 
 
