@@ -9,6 +9,8 @@
   <h1>Coupon</h1>
   <button onclick="window.location.href='/'">Go Back</button>
   <button onclick="window.location.href='/coupon/new'">Create New Coupon</button>
+
+  <!-- Search and Sort Form -->
   <form method="GET" action="/coupon" id="sortForm">
     <input type="text" name="search" placeholder="Search by Coupon Title" value="<%= search %>">
     <select name="sort" onchange="document.getElementById('sortForm').submit()">
@@ -21,9 +23,17 @@
     </select>
     <button type="submit">Search</button>
   </form>
-<% if (typeof message !== 'undefined') { %>
-  <div class="alert"><%= message %></div>
-<% } %>
+
+  <!-- View Valid Coupons Button -->
+<form method="GET" action="/coupon">
+  <input type="hidden" name="viewValid" value="<%= viewValid ? 'false' : 'true' %>">
+  <button type="submit"><%= viewValid ? 'View All Coupons' : 'View Valid Coupons' %></button>
+</form>
+
+  <% if (typeof message !== 'undefined') { %>
+    <div class="alert"><%= message %></div>
+  <% } %>
+
   <table>
     <thead>
       <tr>
@@ -34,6 +44,7 @@
         <th>CouponStartDate</th>
         <th>CouponExpire</th>
         <th>Max Discount</th>
+        <th>Total Affected Courses</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -47,6 +58,7 @@
           <td><%= coupon.CouponStartDate %></td>
           <td><%= coupon.CouponExpire %></td>
           <td><%= coupon.CouponMaxDiscount %></td>
+          <td><%= coupon.TotalAffectedCourses || 0 %></td>
           <td>
             <button onclick="window.location.href='/coupon/edit/<%= coupon.CouponID %>'">Edit</button>
             <form method="POST" action="/coupon/delete/<%= coupon.CouponID %>" style="display:inline;">

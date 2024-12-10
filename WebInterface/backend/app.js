@@ -309,27 +309,69 @@ app.get("/paymentmethod", async (req, res) => {
 });
 
 //=======================================================================================================
+// app.get("/coupon", async (req, res) => {
+//   const search = req.query.search || "";
+//   const sort = req.query.sort || "CouponID";
+//   const message = req.query.message;
+//   try {
+//     const pool = await poolPromise;
+//     const query = `
+//       SELECT * FROM Coupon
+//       WHERE CouponTitle LIKE @search
+//       ORDER BY ${sort}
+//     `;
+//     const result = await pool
+//       .request()
+//       .input("search", sql.NVarChar, `%${search}%`)
+//       .query(query);
+//     res.render("coupon", { coupons: result.recordset, search, sort, message });
+//   } catch (err) {
+//     console.error("Error fetching data:", err);
+//     res.status(500).send("Error fetching data from database.");
+//   }
+// });
+
 app.get("/coupon", async (req, res) => {
   const search = req.query.search || "";
   const sort = req.query.sort || "CouponID";
   const message = req.query.message;
+  const viewValid = req.query.viewValid === "true";
+
   try {
     const pool = await poolPromise;
-    const query = `
-      SELECT * FROM Coupon
-      WHERE CouponTitle LIKE @search
-      ORDER BY ${sort}
-    `;
-    const result = await pool
-      .request()
-      .input("search", sql.NVarChar, `%${search}%`)
-      .query(query);
-    res.render("coupon", { coupons: result.recordset, search, sort, message });
+    let query;
+    let result;
+
+    if (viewValid) {
+      result = await pool.request().execute("sp_GetValidCoupons");
+    } else {
+      query = `
+        SELECT * FROM Coupon
+        WHERE CouponTitle LIKE @search
+        ORDER BY ${sort}
+      `;
+      result = await pool
+        .request()
+        .input("search", sql.NVarChar, `%${search}%`)
+        .query(query);
+    }
+
+    res.render("coupon", {
+      coupons: result.recordset,
+      search,
+      sort,
+      message,
+      viewValid,
+    });
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).send("Error fetching data from database.");
   }
 });
+
+
+
+
 
 app.get("/coupon/new", (req, res) => {
   const message = req.query.message;

@@ -1,5 +1,4 @@
----------------------------------------------------------------------2.3---------------------------------------------------------------------
---Function 1: Tìm kiếm và hiển thị thông tin các khóa học trong một danh mục cụ thể,
+--Procedure 1: Tìm kiếm và hiển thị thông tin các khóa học trong một danh mục cụ thể,
 --có điểm đánh giá trung bình cao hơn hoặc bằng một mức điểm cho trước
 GO
 CREATE PROCEDURE GetCoursesInCategoryByMinRating
@@ -44,18 +43,13 @@ BEGIN
 END;
 
 
--- Thực thi câu lệnh mẫu
-EXEC GetCoursesInCategoryByMinRating @CategoryName = N'Lập trình', @MinRating = 4.0
-
-
---Function 2: lấy danh sách các mã giảm giá còn hiệu lực tại một thời điểm cụ thể,
---kèm theo thống kê số lượng đơn hàng đã sử dụng mã giảm giá đó.
-
+-- Procedure 2: Lấy danh sách các mã giảm giá hợp lệ
 GO
-CREATE PROCEDURE sp_GetValidCoupons
-    @CheckDate DATE
+CREATE OR ALTER PROCEDURE sp_GetValidCoupons
 AS
 BEGIN
+    DECLARE @CurrentDate DATE = GETDATE();
+
     SELECT
         c.CouponID,
         c.CouponTitle,
@@ -64,22 +58,18 @@ BEGIN
         c.CouponStartDate,
         c.CouponExpire,
         c.CouponMaxDiscount,
-        COUNT(DISTINCT o.OrderID) as TotalOrders
-    FROM Coupon c, Orders o
-    WHERE c.CouponStartDate <= @CheckDate
-    AND c.CouponExpire >= @CheckDate
-    AND c.CouponID = o.CouponID
-    GROUP BY
-        c.CouponID,
-        c.CouponTitle,
-        c.CouponValue,
-        c.CouponType,
-        c.CouponStartDate,
-        c.CouponExpire,
-        c.CouponMaxDiscount
-    ORDER BY
-        c.CouponExpire ASC;
+        (
+            SELECT COUNT(DISTINCT co.CourseID)
+            FROM Orders o, CourseOrder co
+            WHERE o.CouponID = c.CouponID
+            AND co.OrderID = o.OrderID
+        ) as TotalAffectedCourses
+    FROM Coupon c
+    WHERE c.CouponStartDate <= @CurrentDate
+    AND c.CouponExpire >= @CurrentDate
+    ORDER BY TotalAffectedCourses DESC, c.CouponExpire ASC;
 END;
 
--- Thực thi câu lệnh mẫu
-EXEC sp_GetValidCoupons @CheckDate = '2024-03-27'
+EXEC GetCoursesInCategoryByMinRating @CategoryName = N'Lập trình', @MinRating = 4.0
+
+EXEC sp_GetValidCoupons;
