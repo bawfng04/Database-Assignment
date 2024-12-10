@@ -39,7 +39,7 @@ The project includes the following SQL scripts:
 2. Navigate to the `WebInterface/backend` directory and modify the `.env` file to include the correct database connection details.
 3. Run `npm install` to install the necessary dependencies.
 4. Run `npm start` to start the server.
-5. Open [http://localhost:3500](http://localhost:3500) in your browser to visualize the tables. The web interface will have all the corresponding data tables, and specific functions for some tables (see sql file)
+5. Open [http://localhost:3500](http://localhost:3500) in your browser to visualize the tables. The web interface will have all the corresponding data tables, and specific functions for some tables (see sql file).
 
 ## Database Schema Diagrams
 ![Schema](Schema.drawio.png)
